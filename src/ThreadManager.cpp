@@ -57,12 +57,6 @@ ThreadManager* ThreadManager::getInstance()
 
 void ThreadManager::addThread(ThreadRunnable* objRun)
 {
-	/*ThreadList* next								= ThreadManager::getInstance()->mThreadList;
-	ThreadList* head								= new ThreadList();
-	head->mNext										= next;
-	head->mObjRun									= objRun;
-	ThreadManager::getInstance()->mThreadList		= head;*/
-
 	ThreadList** i									= &(ThreadManager::getInstance()->mThreadList);
 	for(;*i;i=&((*i)->mNext));
 	(*i)											= new ThreadList();
