@@ -10,6 +10,7 @@
 
 #include <memory>
 #include <boost/thread.hpp>
+#include <boost/thread/mutex.hpp>
 
 using namespace std;
 using namespace boost;
@@ -17,7 +18,8 @@ using namespace boost;
 /**
  * Pure virtual class, that is interface for object in new thread.
  */
-class ThreadRunnable {
+class ThreadRunnable
+{
 public:
 
 	/**
@@ -39,7 +41,8 @@ public:
 /**
  * Singleton class that is used to manage of all threads in application.
  */
-class ThreadManager {
+class ThreadManager
+{
 private:
 
 	/**
@@ -186,6 +189,144 @@ public:
 	static void									endNowAll();
 
 
+};
+
+/**
+ * Class which supports boost mutex functionality. Behavior of this class is similar to simple Smart Pointer class.
+ * This class do not delete object given in constructor. Also this is a template class.
+ */
+
+template <typename T>
+class ThreadDataUnit
+{
+	/**
+	 * Template pointer to data object.
+	 */
+	T*		mPtr;
+
+	/**
+	 * Mutex object, used to synchronize access to data pointer.
+	 */
+	mutex	mMutex;
+
+public:
+
+	/**
+	 * Constructor.
+	 */
+	ThreadDataUnit()
+	{
+		lockData();
+		mPtr		= NULL;
+		unlockData();
+	}
+
+	/**
+	 * Constructor.
+	 * @param ptr - Pointer to data object which will be managed by ThreadDataUnit object.
+	 */
+	ThreadDataUnit(T* ptr)
+	{
+		lockData();
+		mPtr		= ptr;
+		unlockData();
+	}
+
+	/**
+	 * Destructor.
+	 */
+	~ThreadDataUnit()
+	{
+		lockData();
+		if(mPtr!=NULL)
+		{
+			delete mPtr;
+		}
+		unlockData();
+	}
+
+	/**
+	 * Method used to set new pointer in ThreadDataUnit object. When we set new pointer, object under old pointer is not released.
+	 * @param ptr - New pointer.
+	 */
+	void setPtr(T* ptr)
+	{
+		lockData();
+		mPtr		= ptr;
+		unlockData();
+	}
+
+	/**
+	 * Method used to get actual pointer.
+	 */
+	T* getPtr()
+	{
+		return mPtr;
+	}
+
+	/**
+	 * Method used to delete and set to NULL actual object under ptr pointer.
+	 */
+	void removePtr()
+	{
+		lockData();
+		if(mPtr!=NULL)
+		{
+			delete mPtr;
+			mPtr		= NULL;
+		}
+		unlockData();
+	}
+
+	/**
+	 * Method used to delete old object and set new object.
+	 * @param ptr - Pointer to new object.
+	 */
+	void resetPtr(T* ptr)
+	{
+		lockData();
+		if(mPtr!=NULL)
+		{
+			delete mPtr;
+			mPtr		= NULL;
+		}
+		mPtr		= ptr;
+		unlockData();
+	}
+
+	T* operator->()
+	{
+		return mPtr;
+	}
+
+	T& operator*()
+	{
+		return *mPtr;
+	}
+
+	/**
+	 * Method used to lock access to data.
+	 */
+	void lockData()
+	{
+		mMutex.lock();
+	}
+
+	/*
+	 * Method used to try lock access to data.
+	 */
+	void tryLockData()
+	{
+		mMutex.try_lock();
+	}
+
+	/**
+	 * Method used to unlock data.
+	 */
+	void unlockData()
+	{
+		mMutex.unlock();
+	}
 };
 
 #endif /* THREADMANAGER_H_ */
