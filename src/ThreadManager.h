@@ -234,19 +234,6 @@ public:
 	}
 
 	/**
-	 * Destructor.
-	 */
-	~ThreadDataUnit()
-	{
-		lockData();
-		if(mPtr!=NULL)
-		{
-			delete mPtr;
-		}
-		unlockData();
-	}
-
-	/**
 	 * Method used to set new pointer in ThreadDataUnit object. When we set new pointer, object under old pointer is not released.
 	 * @param ptr - New pointer.
 	 */
@@ -276,22 +263,6 @@ public:
 			delete mPtr;
 			mPtr		= NULL;
 		}
-		unlockData();
-	}
-
-	/**
-	 * Method used to delete old object and set new object.
-	 * @param ptr - Pointer to new object.
-	 */
-	void resetPtr(T* ptr)
-	{
-		lockData();
-		if(mPtr!=NULL)
-		{
-			delete mPtr;
-			mPtr		= NULL;
-		}
-		mPtr		= ptr;
 		unlockData();
 	}
 
