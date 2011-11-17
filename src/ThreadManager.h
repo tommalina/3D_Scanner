@@ -196,7 +196,6 @@ public:
  * This class do not delete object given in constructor. Also this is a template class.
  */
 
-// TODO: Test this class.
 template <typename T>
 class ThreadDataUnit
 {
