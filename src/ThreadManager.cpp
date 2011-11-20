@@ -44,7 +44,7 @@ ThreadManager::~ThreadManager()
 	}
 }
 
-auto_ptr<ThreadManager>	ThreadManager::mInstance;
+std::auto_ptr<ThreadManager>	ThreadManager::mInstance;
 
 ThreadManager* ThreadManager::getInstance()
 {
@@ -71,7 +71,7 @@ void ThreadManager::startThread(ThreadRunnable* objRun)
 		if(i->mObjRun==objRun) {
 			if(i->mThread==NULL) {
 				ThreadBoost threadBoost(i->mObjRun);
-				i->mThread		= new thread(threadBoost);
+				i->mThread		= new boost::thread(threadBoost);
 			}
 			break;
 		}
@@ -84,7 +84,7 @@ void ThreadManager::startAll()
 	{
 		if(i->mThread==NULL) {
 			ThreadBoost threadBoost(i->mObjRun);
-			i->mThread		= new thread(threadBoost);
+			i->mThread		= new boost::thread(threadBoost);
 		}
 	}
 }

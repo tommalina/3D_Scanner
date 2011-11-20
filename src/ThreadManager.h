@@ -12,9 +12,6 @@
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 
-using namespace std;
-using namespace boost;
-
 /**
  * Pure virtual class, that is interface for object in new thread.
  */
@@ -48,7 +45,7 @@ private:
 	/**
 	 * Smart Pointer to only one instance of ThreadManager.
 	 */
-	static auto_ptr<ThreadManager>				mInstance;
+	static std::auto_ptr<ThreadManager>			mInstance;
 
 	/**
 	 * Method used to get pointer to ThreadManager.
@@ -74,7 +71,7 @@ private:
 		/**
 		 * Pointer to boost thread.
 		 */
-		thread*				mThread;
+		boost::thread*		mThread;
 
 		/**
 		 * Public constructor.
@@ -202,12 +199,12 @@ class ThreadDataUnit
 	/**
 	 * Template pointer to data object.
 	 */
-	T*		mPtr;
+	T*				mPtr;
 
 	/**
 	 * Mutex object, used to synchronize access to data pointer.
 	 */
-	mutex	mMutex;
+	boost::mutex	mMutex;
 
 public:
 
