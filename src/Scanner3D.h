@@ -8,6 +8,11 @@
 #ifndef SCANNER3D_H_
 #define SCANNER3D_H_
 
+#include <gtk/gtk.h>
+#include <gtk/gtkmain.h>
+#include <gtk/gtkbuilder.h>
+#include <gtk/gtkwidget.h>
+
 #include <stdlib.h>
 #include <memory>
 

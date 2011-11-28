@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <!-- interface-requires gtk+ 3.0 -->
+  <!-- interface-naming-policy toplevel-contextual -->
   <object class="GtkWindow" id="mainWindow">
     <property name="width_request">640</property>
     <property name="height_request">320</property>
@@ -9,6 +10,7 @@
     <property name="title">3D Scanner</property>
     <property name="default_width">640</property>
     <property name="default_height">320</property>
+    <signal name="destroy" handler="mainWindowDestroy" swapped="no"/>
     <child>
       <object class="GtkVBox" id="box1">
         <property name="visible">True</property>
@@ -17,7 +19,6 @@
           <object class="GtkStatusbar" id="statusbar1">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="orientation">vertical</property>
             <property name="spacing">2</property>
           </object>
           <packing>
@@ -32,9 +33,10 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
-              <object class="GtkDrawingArea" id="drawingarea1">
+              <object class="GtkImage" id="image1">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="stock">gtk-missing-image</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -54,10 +56,10 @@
                     <child>
                       <object class="GtkButton" id="button1">
                         <property name="label" translatable="yes">button</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="use_action_appearance">False</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -77,10 +79,33 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkHScale" id="scale1">
+                      <object class="GtkHBox" id="hbox3">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="round_digits">1</property>
+                        <property name="can_focus">False</property>
+                        <child>
+                          <object class="GtkLabel" id="label3">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">label</property>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkHScale" id="hscale1">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="round_digits">1</property>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -89,10 +114,33 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkHScale" id="scale2">
+                      <object class="GtkHBox" id="hbox4">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="round_digits">1</property>
+                        <property name="can_focus">False</property>
+                        <child>
+                          <object class="GtkLabel" id="label4">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">label</property>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkHScale" id="hscale2">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="round_digits">1</property>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -101,10 +149,33 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkHScale" id="scale3">
+                      <object class="GtkHBox" id="hbox5">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="round_digits">1</property>
+                        <property name="can_focus">False</property>
+                        <child>
+                          <object class="GtkLabel" id="label5">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">label</property>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkHScale" id="hscale3">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="round_digits">1</property>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -117,6 +188,95 @@
                     <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkVBox" id="vbox1">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkHBox" id="hbox1">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <child>
+                          <object class="GtkLabel" id="label1">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Camera 1 id: </property>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkSpinButton" id="spinbutton1">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="invisible_char">•</property>
+                            <property name="primary_icon_activatable">False</property>
+                            <property name="secondary_icon_activatable">False</property>
+                            <property name="primary_icon_sensitive">True</property>
+                            <property name="secondary_icon_sensitive">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkHBox" id="hbox2">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <child>
+                          <object class="GtkLabel" id="label2">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Camera2 id: </property>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkSpinButton" id="spinbutton2">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="invisible_char">•</property>
+                            <property name="primary_icon_activatable">False</property>
+                            <property name="secondary_icon_activatable">False</property>
+                            <property name="primary_icon_sensitive">True</property>
+                            <property name="secondary_icon_sensitive">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
               </object>

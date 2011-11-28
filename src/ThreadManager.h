@@ -148,7 +148,6 @@ public:
 	/**
 	 * Method used to add new thread.
 	 * @param objRun - Pointer to ThreadRunable object, that will be called in new thread.
-	 * @param data - Pointer to data that will be send to run method in ThreadRunable object.
 	 */
 	static void 								addThread(ThreadRunnable* objRun);
 

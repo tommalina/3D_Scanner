@@ -6,18 +6,11 @@
  */
 
 /**
- * Load gtk headers.
- */
-#include <gtk/gtk.h>
-#include <gtk/gtkmain.h>
-#include <gtk/gtkbuilder.h>
-#include <gtk/gtkwidget.h>
-
-/**
  * Load local headers.
  */
 #include "Scanner3D.h"
 #include "ThreadManager.h"
+#include "DisplayMain.h"
 
 std::auto_ptr<Scanner3D> Scanner3D::mInstance;
 
@@ -48,6 +41,8 @@ Scanner3D::~Scanner3D()
 int Scanner3D::Run(int argc, char** argv)
 {
 
+	// Initialize UI from xml file.
+
 	GtkBuilder		*builder;
 	GtkWidget		*window;
 	GError			*error		= NULL;
@@ -70,8 +65,17 @@ int Scanner3D::Run(int argc, char** argv)
 
 	gtk_widget_show(window);
 
-	gtk_main();
+	// Start application threads that will support all 2D and 3D calculations.
 
+	DisplayMain displayMain;
+
+	ThreadManager::addThread(&displayMain);
+
+	ThreadManager::startAll();
+
+	// Start UI main GTK thread.
+
+	gtk_main();
 
 	return 0;
 }
