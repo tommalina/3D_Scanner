@@ -33,6 +33,12 @@ public:
 	 * Virtual destructor.
 	 */
 	virtual ~ThreadRunnable() {};
+
+	/**
+	 *
+	 * @param Integer. Amount of milliseconds.
+	 */
+	void sleep(int);
 };
 
 /**

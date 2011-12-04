@@ -32,6 +32,8 @@ private:
 
 	int									Run(int, char**);
 
+	static void 						mainWindowDestroy(GtkObject *object, gpointer user_data);
+
 public:
 
 	~Scanner3D();

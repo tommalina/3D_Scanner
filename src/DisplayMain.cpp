@@ -20,10 +20,10 @@ DisplayMain::~DisplayMain()
 
 void DisplayMain::run()
 {
-	//while(mRun)
-	//{
+	while(mRun)
+	{
 		printf(" --------- DisplayMain \n");
-	//}
+	}
 }
 
 void DisplayMain::end()

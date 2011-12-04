@@ -10,7 +10,6 @@
     <property name="title">3D Scanner</property>
     <property name="default_width">640</property>
     <property name="default_height">320</property>
-    <signal name="destroy" handler="mainWindowDestroy" swapped="no"/>
     <child>
       <object class="GtkVBox" id="box1">
         <property name="visible">True</property>

@@ -58,6 +58,7 @@ int Scanner3D::Run(int argc, char** argv)
 	}
 
 	window			= GTK_WIDGET(gtk_builder_get_object(builder , "mainWindow" ));
+	g_signal_connect (GTK_OBJECT(window), "destroy", G_CALLBACK (mainWindowDestroy), NULL);
 
 	gtk_builder_connect_signals(builder, NULL);
 
@@ -83,4 +84,13 @@ int Scanner3D::Run(int argc, char** argv)
 int Scanner3D::Scanner3DRun(int argc, char** argv)
 {
 	return getInstance()->Run(argc, argv);
+}
+
+void Scanner3D::mainWindowDestroy(GtkObject *object, gpointer user_data)
+{
+	// Stop all application threads.
+
+	ThreadManager::endNowAll();
+
+	gtk_main_quit ();
 }
