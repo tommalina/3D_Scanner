@@ -45,6 +45,9 @@ int Scanner3D::Run(int argc, char** argv)
 
 	GtkBuilder		*builder;
 	GtkWidget		*window;
+	GtkWidget		*camera1;
+	GtkDrawingArea	*camera2;
+
 	GError			*error		= NULL;
 
 	gtk_init(&argc, &argv);
@@ -60,6 +63,10 @@ int Scanner3D::Run(int argc, char** argv)
 	window			= GTK_WIDGET(gtk_builder_get_object(builder , "mainWindow" ));
 	g_signal_connect (GTK_OBJECT(window), "destroy", G_CALLBACK (mainWindowDestroy), NULL);
 
+	camera1			= GTK_WIDGET(gtk_builder_get_object(builder, "camera1"));
+
+	camera2			= GTK_DRAWING_AREA(gtk_builder_get_object(builder, "camera2"));
+
 	gtk_builder_connect_signals(builder, NULL);
 
 	g_object_unref(G_OBJECT(builder));
@@ -68,7 +75,7 @@ int Scanner3D::Run(int argc, char** argv)
 
 	// Start application threads that will support all 2D and 3D calculations.
 
-	DisplayMain displayMain;
+	DisplayMain displayMain(25, camera1, camera2);
 
 	ThreadManager::addThread(&displayMain);
 
