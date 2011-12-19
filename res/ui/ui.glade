@@ -38,7 +38,7 @@
                 <property name="n_rows">2</property>
                 <property name="n_columns">2</property>
                 <child>
-                  <object class="GtkVBox" id="vbox2">
+                  <object class="GtkVBox" id="VBox1">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
@@ -54,7 +54,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkImage" id="camera1">
+                      <object class="GtkDrawingArea" id="camera1">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                       </object>
@@ -67,7 +67,7 @@
                   </object>
                 </child>
                 <child>
-                  <object class="GtkVBox" id="vbox3">
+                  <object class="GtkVBox" id="VBox2">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
@@ -83,7 +83,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkImage" id="camera2">
+                      <object class="GtkDrawingArea" id="camera2">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                       </object>
@@ -116,15 +116,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkDrawingArea" id="drawingarea3">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
+                      <placeholder/>
                     </child>
                   </object>
                   <packing>
@@ -149,15 +141,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkDrawingArea" id="drawingarea4">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
+                      <placeholder/>
                     </child>
                   </object>
                   <packing>
