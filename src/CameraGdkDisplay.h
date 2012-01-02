@@ -27,6 +27,8 @@ private:
 	GtkDrawingArea*				mDrawingArea1;
 	GtkDrawingArea*				mDrawingArea2;
 
+	static CameraGdkDisplay*	mInstance;
+
 	void 						display();
 
 	static gboolean 			drawCallback(GtkWidget *widget, GdkEventExpose *event, gpointer data);
@@ -37,8 +39,7 @@ public:
 	IplImage*					mImage2;
 	GdkPixbuf*					mPixbuf1;
 	GdkPixbuf*					mPixbuf2;
-
-	static CameraGdkDisplay*	mInstance;
+	boost::mutex				mMutex;
 
 	CameraGdkDisplay(unsigned int fps, GtkDrawingArea* drawingArea1, GtkDrawingArea* drawingArea2);
 

@@ -50,6 +50,10 @@ int Scanner3D::Run(int argc, char** argv)
 
 	GError			*error		= NULL;
 
+	g_thread_init( NULL );
+
+	gdk_threads_init();
+
 	gtk_init(&argc, &argv);
 
 	builder			= gtk_builder_new();
@@ -83,7 +87,11 @@ int Scanner3D::Run(int argc, char** argv)
 
 	// Start UI main GTK thread.
 
+	gdk_threads_enter();
+
 	gtk_main();
+
+	gdk_threads_leave();
 
 	return 0;
 }
