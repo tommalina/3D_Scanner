@@ -47,6 +47,8 @@ int Scanner3D::Run(int argc, char** argv)
 	GtkWidget		*window;
 	GtkDrawingArea	*camera1;
 	GtkDrawingArea	*camera2;
+	GtkSpinButton	*spinButton1;
+	GtkSpinButton	*spinButton2;
 
 	GError			*error		= NULL;
 
@@ -71,6 +73,10 @@ int Scanner3D::Run(int argc, char** argv)
 
 	camera2			= GTK_DRAWING_AREA(gtk_builder_get_object(builder, "camera2"));
 
+	spinButton1		= GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "cameraId1"));
+
+	spinButton2		= GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "cameraId2"));
+
 	gtk_builder_connect_signals(builder, NULL);
 
 	g_object_unref(G_OBJECT(builder));
@@ -79,7 +85,7 @@ int Scanner3D::Run(int argc, char** argv)
 
 	// Start application threads that will support all 2D and 3D calculations.
 
-	CameraGdkDisplay cameraGdkDisplay(25, camera1, camera2);
+	CameraGdkDisplay cameraGdkDisplay(25, camera1, camera2, spinButton1, spinButton2);
 
 	ThreadManager::addThread(&cameraGdkDisplay);
 

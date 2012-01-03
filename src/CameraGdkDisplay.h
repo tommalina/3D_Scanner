@@ -22,26 +22,33 @@ private:
 
 	bool						mRun;
 	unsigned int				mFPS;
-	Camera*						mCamera1;
-	Camera*						mCamera2;
 	GtkDrawingArea*				mDrawingArea1;
 	GtkDrawingArea*				mDrawingArea2;
+	GtkSpinButton*				mSpinButton1;
+	GtkSpinButton*				mSpinButton2;
 
 	static CameraGdkDisplay*	mInstance;
 
 	void 						display();
 
-	static gboolean 			drawCallback(GtkWidget *widget, GdkEventExpose *event, gpointer data);
+	static gboolean 			drawCallback1(GtkWidget *widget, GdkEventExpose *event, gpointer data);
+	static gboolean 			drawCallback2(GtkWidget *widget, GdkEventExpose *event, gpointer data);
+	static void					changeCallback1(GtkSpinButton *spinbutton, gpointer data);
+	static void					changeCallback2(GtkSpinButton *spinbutton, gpointer data);
 
 public:
 
+	Camera*						mCamera1;
+	Camera*						mCamera2;
 	IplImage*					mImage1;
 	IplImage*					mImage2;
 	GdkPixbuf*					mPixbuf1;
 	GdkPixbuf*					mPixbuf2;
+	int							mCameraId1;
+	int							mCameraId2;
 	boost::mutex				mMutex;
 
-	CameraGdkDisplay(unsigned int fps, GtkDrawingArea* drawingArea1, GtkDrawingArea* drawingArea2);
+	CameraGdkDisplay(unsigned int fps, GtkDrawingArea* drawingArea1, GtkDrawingArea* drawingArea2, GtkSpinButton* spinButton1, GtkSpinButton* spinButton2);
 
 	virtual ~CameraGdkDisplay();
 
