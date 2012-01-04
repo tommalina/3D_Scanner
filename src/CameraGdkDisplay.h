@@ -16,18 +16,50 @@
 #include <gtkmm.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
+/**
+ * Class used to display two images from camera.
+ */
+
 class CameraGdkDisplay : public ThreadRunnable
 {
 private:
 
+	/**
+	 * If true then thread which dispaly images is runnig.
+	 */
 	bool						mRun;
+
+	/**
+	 * Amount of frames in one second.
+	 */
 	unsigned int				mFPS;
+
+	/**
+	 * Pointer to camera 1 drawing area.
+	 */
 	GtkDrawingArea*				mDrawingArea1;
+
+	/**
+	 * Pointer to camera 2 drawing area.
+	 */
 	GtkDrawingArea*				mDrawingArea2;
+
+	/**
+	 * Pointer to spin button of first camera.
+	 */
 	GtkSpinButton*				mSpinButton1;
+
+	/**
+	 * Pointer to spin button of second camera.
+	 */
 	GtkSpinButton*				mSpinButton2;
 
+	/**
+	 * Pointer to instance of this object.
+	 */
 	static CameraGdkDisplay*	mInstance;
+
+
 
 	void 						display();
 

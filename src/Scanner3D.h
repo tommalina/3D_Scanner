@@ -51,6 +51,11 @@ private:
 	 */
 	int									Run(int, char**);
 
+	/**
+	 * Static method which is called as callback when window is destroing.
+	 * @param object - Pointer to GtkObject.
+	 * @param user_data - gpointer to user data.
+	 */
 	static void 						mainWindowDestroy(GtkObject *object, gpointer user_data);
 
 public:
