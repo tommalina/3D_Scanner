@@ -6,18 +6,11 @@
  */
 
 /**
- * Load gtk headers.
- */
-#include <gtk/gtk.h>
-#include <gtk/gtkmain.h>
-#include <gtk/gtkbuilder.h>
-#include <gtk/gtkwidget.h>
-
-/**
  * Load local headers.
  */
 #include "Scanner3D.h"
 #include "ThreadManager.h"
+#include "CameraGdkDisplay.h"
 
 std::auto_ptr<Scanner3D> Scanner3D::mInstance;
 
@@ -48,9 +41,20 @@ Scanner3D::~Scanner3D()
 int Scanner3D::Run(int argc, char** argv)
 {
 
+	// Initialize UI from xml file.
+
 	GtkBuilder		*builder;
 	GtkWidget		*window;
+	GtkDrawingArea	*camera1;
+	GtkDrawingArea	*camera2;
+	GtkSpinButton	*spinButton1;
+	GtkSpinButton	*spinButton2;
+
 	GError			*error		= NULL;
+
+	g_thread_init( NULL );
+
+	gdk_threads_init();
 
 	gtk_init(&argc, &argv);
 
@@ -63,6 +67,15 @@ int Scanner3D::Run(int argc, char** argv)
 	}
 
 	window			= GTK_WIDGET(gtk_builder_get_object(builder , "mainWindow" ));
+	g_signal_connect (GTK_OBJECT(window), "destroy", G_CALLBACK (mainWindowDestroy), NULL);
+
+	camera1			= GTK_DRAWING_AREA(gtk_builder_get_object(builder, "camera1"));
+
+	camera2			= GTK_DRAWING_AREA(gtk_builder_get_object(builder, "camera2"));
+
+	spinButton1		= GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "cameraId1"));
+
+	spinButton2		= GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "cameraId2"));
 
 	gtk_builder_connect_signals(builder, NULL);
 
@@ -70,8 +83,21 @@ int Scanner3D::Run(int argc, char** argv)
 
 	gtk_widget_show(window);
 
+	// Start application threads that will support all 2D and 3D calculations.
+
+	CameraGdkDisplay cameraGdkDisplay(25, camera1, camera2, spinButton1, spinButton2);
+
+	ThreadManager::addThread(&cameraGdkDisplay);
+
+	ThreadManager::startAll();
+
+	// Start UI main GTK thread.
+
+	gdk_threads_enter();
+
 	gtk_main();
 
+	gdk_threads_leave();
 
 	return 0;
 }
@@ -79,4 +105,13 @@ int Scanner3D::Run(int argc, char** argv)
 int Scanner3D::Scanner3DRun(int argc, char** argv)
 {
 	return getInstance()->Run(argc, argv);
+}
+
+void Scanner3D::mainWindowDestroy(GtkObject *object, gpointer user_data)
+{
+	// Stop all application threads.
+
+	ThreadManager::endNowAll();
+
+	gtk_main_quit ();
 }

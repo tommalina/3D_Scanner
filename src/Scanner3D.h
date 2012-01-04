@@ -8,6 +8,11 @@
 #ifndef SCANNER3D_H_
 #define SCANNER3D_H_
 
+#include <gtk/gtk.h>
+#include <gtk/gtkmain.h>
+#include <gtk/gtkbuilder.h>
+#include <gtk/gtkwidget.h>
+
 #include <stdlib.h>
 #include <memory>
 
@@ -45,6 +50,8 @@ private:
 	 * @param char** - Table with string arguments.
 	 */
 	int									Run(int, char**);
+
+	static void 						mainWindowDestroy(GtkObject *object, gpointer user_data);
 
 public:
 

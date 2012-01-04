@@ -8,9 +8,8 @@
 #ifndef CAMERA_H_
 #define CAMERA_H_
 
-#include <cv.h>
-#include <highgui.h>
-#include <cvtypes.h>
+#include <opencv.hpp>
+#include <highgui.hpp>
 
 class Camera {
 private:
