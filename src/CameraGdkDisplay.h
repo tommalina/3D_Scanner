@@ -59,13 +59,29 @@ private:
 	 */
 	static CameraGdkDisplay*	mInstance;
 
-
-
+	/**
+	 * Main method which get images and convert it to display in gtk window.
+	 */
 	void 						display();
 
+	/**
+	 * "Camera 1" drawing area callback method.
+	 */
 	static gboolean 			drawCallback1(GtkWidget *widget, GdkEventExpose *event, gpointer data);
+
+	/**
+	 * "Camera 2" drawing area callback method.
+	 */
 	static gboolean 			drawCallback2(GtkWidget *widget, GdkEventExpose *event, gpointer data);
+
+	/**
+	 * Spin button change callback method.
+	 */
 	static void					changeCallback1(GtkSpinButton *spinbutton, gpointer data);
+
+	/**
+	 * Spin button change callback metohd.
+	 */
 	static void					changeCallback2(GtkSpinButton *spinbutton, gpointer data);
 
 public:
