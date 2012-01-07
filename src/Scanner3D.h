@@ -16,6 +16,8 @@
 #include <stdlib.h>
 #include <memory>
 
+#include "DataContainer.h"
+
 /**
  * Scanner3D. Class that include all 3d scanner functionality.
  */
@@ -33,6 +35,11 @@ private:
 	 * @return - Returns Scanner3D pointer.
 	 */
 	static Scanner3D*					getInstance();
+
+	/**
+	 *
+	 */
+	DataContainer*						mData;
 
 	/**
 	 * Private constructor.

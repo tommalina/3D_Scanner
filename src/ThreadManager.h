@@ -240,9 +240,7 @@ public:
 	 */
 	void setPtr(T* ptr)
 	{
-		lockData();
 		mPtr		= ptr;
-		unlockData();
 	}
 
 	/**
@@ -288,9 +286,9 @@ public:
 	/*
 	 * Method used to try lock access to data.
 	 */
-	void tryLockData()
+	bool tryLockData()
 	{
-		mMutex.try_lock();
+		return mMutex.try_lock();
 	}
 
 	/**

@@ -11,6 +11,7 @@
 #include "Scanner3D.h"
 #include "ThreadManager.h"
 #include "CameraGdkDisplay.h"
+#include "MainDataContainer.h"
 
 std::auto_ptr<Scanner3D> Scanner3D::mInstance;
 
@@ -25,7 +26,7 @@ Scanner3D* Scanner3D::getInstance()
 
 Scanner3D::Scanner3D()
 {
-
+	mData		= new MainDataContainer();
 }
 
 Scanner3D::Scanner3D(Scanner3D& obj)
@@ -35,7 +36,10 @@ Scanner3D::Scanner3D(Scanner3D& obj)
 
 Scanner3D::~Scanner3D()
 {
-
+	if(mData!=NULL)
+	{
+		delete mData;
+	}
 }
 
 int Scanner3D::Run(int argc, char** argv)
@@ -85,7 +89,7 @@ int Scanner3D::Run(int argc, char** argv)
 
 	// Start application threads that will support all 2D and 3D calculations.
 
-	CameraGdkDisplay cameraGdkDisplay(25, camera1, camera2, spinButton1, spinButton2);
+	CameraGdkDisplay cameraGdkDisplay(25, mData, camera1, camera2, spinButton1, spinButton2);
 
 	ThreadManager::addThread(&cameraGdkDisplay);
 

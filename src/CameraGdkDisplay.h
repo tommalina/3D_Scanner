@@ -11,6 +11,7 @@
 #include "ThreadManager.h"
 #include "Scanner3D.h"
 #include "Camera.h"
+#include "DataContainer.h"
 
 #include <glibmm.h>
 #include <gtkmm.h>
@@ -94,9 +95,10 @@ public:
 	GdkPixbuf*					mPixbuf2;
 	int							mCameraId1;
 	int							mCameraId2;
+	DataContainer*				mData;
 	boost::mutex				mMutex;
 
-	CameraGdkDisplay(unsigned int fps, GtkDrawingArea* drawingArea1, GtkDrawingArea* drawingArea2, GtkSpinButton* spinButton1, GtkSpinButton* spinButton2);
+	CameraGdkDisplay(unsigned int fps, DataContainer* data, GtkDrawingArea* drawingArea1, GtkDrawingArea* drawingArea2, GtkSpinButton* spinButton1, GtkSpinButton* spinButton2);
 
 	virtual ~CameraGdkDisplay();
 

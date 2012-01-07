@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-CameraGdkDisplay::CameraGdkDisplay(unsigned int fps, GtkDrawingArea* drawingArea1, GtkDrawingArea* drawingArea2, GtkSpinButton* spinButton1, GtkSpinButton* spinButton2)
+CameraGdkDisplay::CameraGdkDisplay(unsigned int fps, DataContainer* data, GtkDrawingArea* drawingArea1, GtkDrawingArea* drawingArea2, GtkSpinButton* spinButton1, GtkSpinButton* spinButton2)
 {
 	mInstance			= this;
 	mRun				= true;
@@ -27,6 +27,7 @@ CameraGdkDisplay::CameraGdkDisplay(unsigned int fps, GtkDrawingArea* drawingArea
 	mSpinButton2		= spinButton2;
 	mCameraId1			= 0;
 	mCameraId2			= 0;
+	mData				= data;
 
 	if(mDrawingArea1!=NULL)
 	{
@@ -50,8 +51,6 @@ CameraGdkDisplay::CameraGdkDisplay(unsigned int fps, GtkDrawingArea* drawingArea
 
 CameraGdkDisplay::~CameraGdkDisplay()
 {
-
-	//mMutex.unlock();
 
 	if(mCamera1!=NULL)
 	{
@@ -85,11 +84,7 @@ void CameraGdkDisplay::run()
 	while (mRun)
 	{
 
-		//mMutex.lock();
-
 		display();
-
-		//mMutex.unlock();
 
 		currentTime		= clock() / (CLOCKS_PER_SEC / 1000);
 		if(currentTime-lastTime<mFPS) {
@@ -103,7 +98,6 @@ void CameraGdkDisplay::run()
 
 void CameraGdkDisplay::end()
 {
-	mMutex.unlock();
 	gdk_threads_leave();
 	mRun		= false;
 }
@@ -133,6 +127,16 @@ void CameraGdkDisplay::display()
 
 		gtk_widget_queue_draw(GTK_WIDGET(mDrawingArea1));
 
+		if(mData->getImageLeftRef().tryLockData())
+		{
+			if(!mData->getImageLeftRef().getPtr())
+			{
+				mData->getImageLeftRef().setPtr(cvCreateImage( cvSize( mCamera1->getImage()->width, mCamera1->getImage()->height ), mCamera1->getImage()->depth, mCamera1->getImage()->nChannels ));
+			}
+			cvCopy(mCamera1->getImage(), mData->getImageLeftRef().getPtr());
+			mData->getImageLeftRef().unlockData();
+		}
+
 	}
 
 	if(mCamera2->getImage()&&mDrawingArea2)
@@ -151,6 +155,16 @@ void CameraGdkDisplay::display()
 		}
 
 		gtk_widget_queue_draw(GTK_WIDGET(mDrawingArea2));
+
+		if(mData->getImageRightRef().tryLockData())
+		{
+			if(!mData->getImageRightRef().getPtr())
+			{
+				mData->getImageRightRef().setPtr(cvCreateImage( cvSize( mCamera1->getImage()->width, mCamera1->getImage()->height ), mCamera1->getImage()->depth, mCamera1->getImage()->nChannels ));
+			}
+			cvCopy(mCamera1->getImage(), mData->getImageLeftRef().getPtr());
+			mData->getImageRightRef().unlockData();
+		}
 
 	}
 
@@ -198,8 +212,6 @@ gboolean CameraGdkDisplay::drawCallback2 (GtkWidget *widget, GdkEventExpose *eve
 void CameraGdkDisplay::changeCallback1(GtkSpinButton *spinbutton, gpointer data)
 {
 
-	//mInstance->mMutex.lock();
-
 	mInstance->mCameraId1		= gtk_spin_button_get_value_as_int(spinbutton);
 
 	if(mInstance->mCamera1!=NULL)
@@ -215,14 +227,10 @@ void CameraGdkDisplay::changeCallback1(GtkSpinButton *spinbutton, gpointer data)
 	}
 
 	mInstance->mCamera1		= new Camera(mInstance->mCameraId1);
-
-	//mInstance->mMutex.unlock();
 }
 
 void CameraGdkDisplay::changeCallback2(GtkSpinButton *spinbutton, gpointer data)
 {
-	//mInstance->mMutex.lock();
-
 	mInstance->mCameraId2		= gtk_spin_button_get_value_as_int(spinbutton);
 
 	if(mInstance->mCamera2!=NULL)
@@ -238,6 +246,4 @@ void CameraGdkDisplay::changeCallback2(GtkSpinButton *spinbutton, gpointer data)
 	}
 
 	mInstance->mCamera2		= new Camera(mInstance->mCameraId2);
-
-	//mInstance->mMutex.unlock();
 }
