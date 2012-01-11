@@ -8,11 +8,17 @@
 #ifndef CALIBRATION_H_
 #define CALIBRATION_H_
 
+#include <glibmm.h>
+#include <gtkmm.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+
+#include "DataContainer.h"
+
 class Calibration
 {
 public:
 
-	static void initializeCalibrationModule();
+	static void initializeCalibrationModule(GtkSpinButton* calibrationAmount, GtkSpinButton* calibrationDelay, GtkButton* startCalibration, GtkButton* stopCalibration, DataContainer* data);
 };
 
 #endif /* CALIBRATION_H_ */
