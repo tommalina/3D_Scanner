@@ -88,7 +88,7 @@ void CameraGdkDisplay::run()
 
 		currentTime		= clock() / (CLOCKS_PER_SEC / 1000);
 		if(currentTime-lastTime<mFPS) {
-			usleep((mFPS-(currentTime-lastTime))*1000);
+			sleep((mFPS-(currentTime-lastTime)));
 		}
 		lastTime		= clock() / (CLOCKS_PER_SEC / 1000);
 

@@ -7,6 +7,15 @@
 
 #include "ThreadManager.h"
 #include <stdlib.h>
+#include <boost/thread.hpp>
+
+void ThreadRunnable::sleep(int delay)
+{
+	if(delay>0)
+	{
+		boost::this_thread::sleep(boost::posix_time::milliseconds(delay));
+	}
+}
 
 ThreadManager::ThreadList::ThreadList()
 {

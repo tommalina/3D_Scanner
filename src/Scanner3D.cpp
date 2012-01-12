@@ -8,10 +8,12 @@
 /**
  * Load local headers.
  */
+
 #include "Scanner3D.h"
 #include "ThreadManager.h"
 #include "CameraGdkDisplay.h"
 #include "MainDataContainer.h"
+#include "Calibration.h"
 
 std::auto_ptr<Scanner3D> Scanner3D::mInstance;
 
@@ -53,6 +55,12 @@ int Scanner3D::Run(int argc, char** argv)
 	GtkDrawingArea	*camera2;
 	GtkSpinButton	*spinButton1;
 	GtkSpinButton	*spinButton2;
+	GtkSpinButton	*spinButtonChessboardW;
+	GtkSpinButton	*spinButtonChessboardH;
+	GtkButton		*calibrationStartButton;
+	GtkButton		*calibrationStopButton;
+	GtkSpinButton	*calibrationDelayButton;
+	GtkSpinButton	*calibrationAmountButton;
 
 	GError			*error		= NULL;
 
@@ -81,11 +89,27 @@ int Scanner3D::Run(int argc, char** argv)
 
 	spinButton2		= GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "cameraId2"));
 
+	calibrationStartButton		= GTK_BUTTON(gtk_builder_get_object(builder, "calibrationStartButton"));
+
+	calibrationStopButton		= GTK_BUTTON(gtk_builder_get_object(builder, "calibrationStopButton"));
+
+	calibrationDelayButton		= GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "calibrationDelay"));
+
+	calibrationAmountButton		= GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "calibrationAmount"));
+
+	spinButtonChessboardW		= GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "chessboardW"));
+
+	spinButtonChessboardH		= GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "chessboardH"));
+
 	gtk_builder_connect_signals(builder, NULL);
 
 	g_object_unref(G_OBJECT(builder));
 
 	gtk_widget_show(window);
+
+	//Initialize calibration module.
+
+	Calibration::initializeCalibrationModule(calibrationAmountButton, calibrationDelayButton, spinButtonChessboardW, spinButtonChessboardH, calibrationStartButton, calibrationStopButton, mData);
 
 	// Start application threads that will support all 2D and 3D calculations.
 
