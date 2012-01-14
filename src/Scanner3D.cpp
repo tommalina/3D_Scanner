@@ -61,6 +61,7 @@ int Scanner3D::Run(int argc, char** argv)
 	GtkButton		*calibrationStopButton;
 	GtkSpinButton	*calibrationDelayButton;
 	GtkSpinButton	*calibrationAmountButton;
+	GtkSpinButton	*cameraFPS;
 
 	GError			*error		= NULL;
 
@@ -101,6 +102,8 @@ int Scanner3D::Run(int argc, char** argv)
 
 	spinButtonChessboardH		= GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "chessboardH"));
 
+	cameraFPS					= GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "cameraFPS"));
+
 	gtk_builder_connect_signals(builder, NULL);
 
 	g_object_unref(G_OBJECT(builder));
@@ -109,7 +112,7 @@ int Scanner3D::Run(int argc, char** argv)
 
 	//Initialize calibration module.
 
-	Calibration::initializeCalibrationModule(calibrationAmountButton, calibrationDelayButton, spinButtonChessboardW, spinButtonChessboardH, calibrationStartButton, calibrationStopButton, mData);
+	Calibration::initializeCalibrationModule(cameraFPS, calibrationAmountButton, calibrationDelayButton, spinButtonChessboardW, spinButtonChessboardH, calibrationStartButton, calibrationStopButton, mData);
 
 	// Start application threads that will support all 2D and 3D calculations.
 

@@ -137,6 +137,16 @@ void CameraGdkDisplay::display()
 			mData->getImageLeftRef().unlockData();
 		}
 
+		if(mData->getImageLeftGrayRef().tryLockData())
+		{
+			if(!mData->getImageLeftGrayRef().getPtr())
+			{
+				mData->getImageLeftGrayRef().setPtr(cvCreateImage( cvSize( mCamera1->getImageGray()->width, mCamera1->getImageGray()->height ), mCamera1->getImageGray()->depth, mCamera1->getImageGray()->nChannels ));
+			}
+			cvCopy(mCamera1->getImageGray(), mData->getImageLeftGrayRef().getPtr());
+			mData->getImageLeftGrayRef().unlockData();
+		}
+
 	}
 
 	if(mCamera2->getImage()&&mDrawingArea2)
@@ -164,6 +174,16 @@ void CameraGdkDisplay::display()
 			}
 			cvCopy(mCamera1->getImage(), mData->getImageLeftRef().getPtr());
 			mData->getImageRightRef().unlockData();
+		}
+
+		if(mData->getImageRightGrayRef().tryLockData())
+		{
+			if(!mData->getImageRightGrayRef().getPtr())
+			{
+				mData->getImageRightGrayRef().setPtr(cvCreateImage( cvSize( mCamera1->getImageGray()->width, mCamera1->getImageGray()->height ), mCamera1->getImageGray()->depth, mCamera1->getImageGray()->nChannels ));
+			}
+			cvCopy(mCamera1->getImageGray(), mData->getImageRightGrayRef().getPtr());
+			mData->getImageRightGrayRef().unlockData();
 		}
 
 	}

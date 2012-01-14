@@ -12,49 +12,83 @@
 #include "Calibration.h"
 #include "ThreadManager.h"
 
-class Calibrate : public ThreadRunnable
+class CalibrateSample : public ThreadRunnable
 {
 
 private:
 
-	static std::auto_ptr<Calibrate>		mInstance;
-	bool								mRun;
-	DataContainer*						mData;
-	int									mDelay;
-	int									mSampleAmount;
-	int									mChessboardW;
-	int									mChessboardH;
-	GtkSpinButton*						mCalibrationAmont;
-	GtkSpinButton*						mCalibrationDelay;
-	GtkSpinButton*						mCalibrationChessboardW;
-	GtkSpinButton*						mCalibrationChessboardH;
-	GtkButton*							mStartButton;
-	GtkButton*							mStopButton;
+	static std::auto_ptr<CalibrateSample>		mInstance;
+	bool										mRun;
+	DataContainer*								mData;
+	int											mDelay;
+	int											mSampleAmount;
+	int											mChessboardW;
+	int											mChessboardH;
+	GtkSpinButton*								mCalibrationAmont;
+	GtkSpinButton*								mCalibrationDelay;
+	GtkSpinButton*								mCalibrationChessboardW;
+	GtkSpinButton*								mCalibrationChessboardH;
+	GtkButton*									mStartButton;
+	GtkButton*									mStopButton;
 
-	Calibrate();
+	CalibrateSample();
 
-	Calibrate(const Calibrate& obj);
+	CalibrateSample(const CalibrateSample& obj);
 
 public:
 
-	void 								initialize(GtkSpinButton* calibrationAmount, GtkSpinButton* calibrationDelay, GtkSpinButton* calibrationChessboardW, GtkSpinButton* calibrationChessboardH , GtkButton* startCalibration, GtkButton* stopCalibration, DataContainer* data);
+	void 										initialize(GtkSpinButton* calibrationAmount, GtkSpinButton* calibrationDelay, GtkSpinButton* calibrationChessboardW, GtkSpinButton* calibrationChessboardH , GtkButton* startCalibration, GtkButton* stopCalibration, DataContainer* data);
 
-	virtual 							~Calibrate();
+	virtual 									~CalibrateSample();
 
-	void								run();
-	void								end();
+	void										run();
+	void										end();
 
-	static Calibrate*					instance;
+	DataContainer*								getData();
 
-	static Calibrate* 					getInstance();
+	static CalibrateSample*						instance;
 
-	static void 						startCalibrate(GtkButton *button, gpointer   user_data);
+	static CalibrateSample* 					getInstance();
 
-	static void							stopCalibrate(GtkButton *button, gpointer   user_data);
+	static void 								startCalibrateSample(GtkButton *button, gpointer   user_data);
+
+	static void									stopCalibrateSample(GtkButton *button, gpointer   user_data);
 
 };
 
-Calibrate::Calibrate()
+class CalibrateCalculate : public ThreadRunnable
+{
+private:
+
+	static std::auto_ptr<CalibrateCalculate>	mInstance;
+
+	int											mFPS;
+
+	DataContainer*								mData;
+
+	bool										mRun;
+
+	CalibrateCalculate();
+
+	CalibrateCalculate(const CalibrateCalculate& obj);
+
+	void										calculate();
+
+public:
+
+	static CalibrateCalculate*					getInstance();
+
+	virtual 									~CalibrateCalculate();
+
+	void										initialize(GtkSpinButton* fpsCamera, DataContainer* data);
+
+	void										run();
+
+	void										end();
+
+};
+
+CalibrateSample::CalibrateSample()
 {
 	mData					= NULL;
 	mCalibrationAmont		= NULL;
@@ -66,7 +100,7 @@ Calibrate::Calibrate()
 	mRun					= true;
 }
 
-Calibrate::Calibrate(const Calibrate& obj)
+CalibrateSample::CalibrateSample(const CalibrateSample& obj)
 {
 	mData					= NULL;
 	mCalibrationAmont		= NULL;
@@ -78,7 +112,7 @@ Calibrate::Calibrate(const Calibrate& obj)
 	mRun					= true;
 }
 
-void Calibrate::initialize(GtkSpinButton* calibrationAmount, GtkSpinButton* calibrationDelay, GtkSpinButton* calibrationChessboardW, GtkSpinButton* calibrationChessboardH, GtkButton* startCalibration, GtkButton* stopCalibration, DataContainer* data)
+void CalibrateSample::initialize(GtkSpinButton* calibrationAmount, GtkSpinButton* calibrationDelay, GtkSpinButton* calibrationChessboardW, GtkSpinButton* calibrationChessboardH, GtkButton* startCalibration, GtkButton* stopCalibration, DataContainer* data)
 {
 	mData					= data;
 	mCalibrationAmont		= calibrationAmount;
@@ -109,12 +143,12 @@ void Calibrate::initialize(GtkSpinButton* calibrationAmount, GtkSpinButton* cali
 	}
 }
 
-Calibrate::~Calibrate()
+CalibrateSample::~CalibrateSample()
 {
 
 }
 
-void Calibrate::run()
+void CalibrateSample::run()
 {
 	mRun				= true;
 
@@ -123,7 +157,7 @@ void Calibrate::run()
 	while(mRun)
 	{
 
-		printf("Calibrate ---------------- Run ; countAmount = %d \n",countAmount);
+		printf("CalibrateSample ---------------- Run ; countAmount = %d \n",countAmount);
 
 		if(++countAmount>=mSampleAmount)
 		{
@@ -131,49 +165,145 @@ void Calibrate::run()
 		}
 		sleep(mDelay*1000);
 	}
+
+	ThreadManager::endNowThread(CalibrateCalculate::getInstance());
+
 }
 
-void Calibrate::end()
+void CalibrateSample::end()
 {
 	mRun		= false;
-	printf("Calibrate ---------------- End \n");
+	printf("CalibrateSample ---------------- End \n");
 }
 
-std::auto_ptr<Calibrate> Calibrate::mInstance;
+DataContainer* CalibrateSample::getData()
+{
+	return mData;
+}
 
-Calibrate* Calibrate::getInstance()
+std::auto_ptr<CalibrateSample> CalibrateSample::mInstance;
+
+CalibrateSample* CalibrateSample::getInstance()
 {
 	if(mInstance.get()==NULL)
 	{
-		mInstance.reset(new Calibrate());
+		mInstance.reset(new CalibrateSample());
 	}
 	return mInstance.get();
 }
 
-void Calibrate::startCalibrate(GtkButton *button, gpointer   user_data)
+void CalibrateSample::startCalibrateSample(GtkButton *button, gpointer   user_data)
 {
-	ThreadManager::endNowThread(getInstance());
-	ThreadManager::addThread(getInstance());
-	ThreadManager::startThread(getInstance());
+	bool canStart		= false;
+
+	getInstance()->getData()->getImageLeftGrayRef().lockData();
+	getInstance()->getData()->getImageRightGrayRef().lockData();
+	canStart	= getInstance()->getData()->getImageLeftGrayRef().getPtr() != NULL && getInstance()->getData()->getImageRightGrayRef().getPtr() != NULL;
+	getInstance()->getData()->getImageRightGrayRef().unlockData();
+	getInstance()->getData()->getImageLeftGrayRef().unlockData();
+
+	if(canStart)
+	{
+		ThreadManager::endNowThread(getInstance());
+		ThreadManager::endNowThread(CalibrateCalculate::getInstance());
+		ThreadManager::addThread(getInstance());
+		ThreadManager::addThread(CalibrateCalculate::getInstance());
+		ThreadManager::startThread(getInstance());
+		ThreadManager::startThread(CalibrateCalculate::getInstance());
+	}
 }
 
-void Calibrate::stopCalibrate(GtkButton *button, gpointer   user_data)
+void CalibrateSample::stopCalibrateSample(GtkButton *button, gpointer   user_data)
 {
 	ThreadManager::endNowThread(getInstance());
+	ThreadManager::endNowThread(CalibrateCalculate::getInstance());
 }
 
-void Calibration::initializeCalibrationModule(GtkSpinButton* calibrationAmount, GtkSpinButton* calibrationDelay, GtkSpinButton* calibrationChessboardW, GtkSpinButton* calibrationChessboardH, GtkButton* startCalibration, GtkButton* stopCalibration, DataContainer* data)
+CalibrateCalculate::CalibrateCalculate()
 {
-	Calibrate::getInstance()->initialize(calibrationAmount, calibrationDelay, calibrationChessboardW, calibrationChessboardH, startCalibration, stopCalibration, data);
+	mFPS		= 1000/30;
+	mData		= NULL;
+	mRun		= false;
+}
+
+CalibrateCalculate::CalibrateCalculate(const CalibrateCalculate& obj)
+{
+	mFPS		= 1000/30;
+	mData		= NULL;
+	mRun		= false;
+}
+
+CalibrateCalculate::~CalibrateCalculate()
+{
+
+}
+
+void CalibrateCalculate::initialize(GtkSpinButton* fpsCamera, DataContainer* data)
+{
+	if(fpsCamera!=NULL)
+	{
+		mFPS		= 1000/gtk_spin_button_get_value_as_int(fpsCamera);
+	}
+	mData		= data;
+	mRun		= true;
+}
+
+void CalibrateCalculate::run()
+{
+	clock_t lastTime			= clock() / (CLOCKS_PER_SEC / 1000);
+	clock_t currentTime;
+
+	mRun		= true;
+
+	while (mRun)
+	{
+
+		calculate();
+
+		currentTime		= clock() / (CLOCKS_PER_SEC / 1000);
+		if(currentTime-lastTime<mFPS) {
+			sleep((mFPS-(currentTime-lastTime)));
+		}
+		lastTime		= clock() / (CLOCKS_PER_SEC / 1000);
+
+	}
+}
+
+void CalibrateCalculate::end()
+{
+	mRun		= false;
+	printf("CalibrateCalculate ---------------- End \n");
+}
+
+void CalibrateCalculate::calculate()
+{
+	printf("CalibrateCalculate ---------------- calculate \n");
+}
+
+std::auto_ptr<CalibrateCalculate> CalibrateCalculate::mInstance;
+
+CalibrateCalculate* CalibrateCalculate::getInstance()
+{
+	if(mInstance.get()==NULL)
+	{
+		mInstance.reset(new CalibrateCalculate());
+	}
+	return mInstance.get();
+}
+
+void Calibration::initializeCalibrationModule(GtkSpinButton* cameraFPS ,GtkSpinButton* calibrationAmount, GtkSpinButton* calibrationDelay, GtkSpinButton* calibrationChessboardW, GtkSpinButton* calibrationChessboardH, GtkButton* startCalibration, GtkButton* stopCalibration, DataContainer* data)
+{
+	CalibrateSample::getInstance()->initialize(calibrationAmount, calibrationDelay, calibrationChessboardW, calibrationChessboardH, startCalibration, stopCalibration, data);
+	CalibrateCalculate::getInstance()->initialize(cameraFPS, data);
 
 	if(startCalibration!=NULL)
 	{
-		g_signal_connect (G_OBJECT (startCalibration), "clicked", G_CALLBACK (Calibrate::startCalibrate), NULL);
+		g_signal_connect (G_OBJECT (startCalibration), "clicked", G_CALLBACK (CalibrateSample::startCalibrateSample), NULL);
 	}
 
 	if(stopCalibration!=NULL)
 	{
-		g_signal_connect (G_OBJECT (stopCalibration), "clicked", G_CALLBACK (Calibrate::stopCalibrate), NULL);
+		g_signal_connect (G_OBJECT (stopCalibration), "clicked", G_CALLBACK (CalibrateSample::stopCalibrateSample), NULL);
 	}
 }
 
