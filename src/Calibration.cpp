@@ -11,6 +11,7 @@
 
 #include "Calibration.h"
 #include "ThreadManager.h"
+#include "Camera.h"
 
 class CalibrateSample : public ThreadRunnable
 {
@@ -46,8 +47,6 @@ public:
 
 	DataContainer*								getData();
 
-	static CalibrateSample*						instance;
-
 	static CalibrateSample* 					getInstance();
 
 	static void 								startCalibrateSample(GtkButton *button, gpointer   user_data);
@@ -64,9 +63,15 @@ private:
 
 	int											mFPS;
 
+	int											mSampleAmount;
+
 	DataContainer*								mData;
 
 	bool										mRun;
+
+	GtkSpinButton* 								mFpsCalibration;
+
+	GtkSpinButton* 								mCalibrationAmount;
 
 	CalibrateCalculate();
 
@@ -80,7 +85,7 @@ public:
 
 	virtual 									~CalibrateCalculate();
 
-	void										initialize(GtkSpinButton* fpsCamera, DataContainer* data);
+	void										initialize(GtkSpinButton* fpsCalibration, GtkSpinButton* calibrationAmount, DataContainer* data);
 
 	void										run();
 
@@ -122,6 +127,16 @@ void CalibrateSample::initialize(GtkSpinButton* calibrationAmount, GtkSpinButton
 	mStartButton			= startCalibration;
 	mStopButton				= stopCalibration;
 
+}
+
+CalibrateSample::~CalibrateSample()
+{
+
+}
+
+void CalibrateSample::run()
+{
+
 	if(mCalibrationAmont!=NULL)
 	{
 		mSampleAmount		= gtk_spin_button_get_value_as_int(mCalibrationAmont);
@@ -141,15 +156,15 @@ void CalibrateSample::initialize(GtkSpinButton* calibrationAmount, GtkSpinButton
 	{
 		mChessboardH		= gtk_spin_button_get_value_as_int(mCalibrationChessboardH);
 	}
-}
 
-CalibrateSample::~CalibrateSample()
-{
+	mData->getCalibrateChessboardW().lockData();
+	*(mData->getCalibrateChessboardW())		= mChessboardW;
+	mData->getCalibrateChessboardW().unlockData();
 
-}
+	mData->getCalibrateChessboardH().lockData();
+	*(mData->getCalibrateChessboardH())		= mChessboardH;
+	mData->getCalibrateChessboardH().unlockData();
 
-void CalibrateSample::run()
-{
 	mRun				= true;
 
 	int countAmount		= 0;
@@ -167,6 +182,8 @@ void CalibrateSample::run()
 	}
 
 	ThreadManager::endNowThread(CalibrateCalculate::getInstance());
+
+	*(mData->drawChessboard())		= false;
 
 }
 
@@ -208,8 +225,9 @@ void CalibrateSample::startCalibrateSample(GtkButton *button, gpointer   user_da
 		ThreadManager::endNowThread(CalibrateCalculate::getInstance());
 		ThreadManager::addThread(getInstance());
 		ThreadManager::addThread(CalibrateCalculate::getInstance());
-		ThreadManager::startThread(getInstance());
-		ThreadManager::startThread(CalibrateCalculate::getInstance());
+		ThreadManager::startThread(getInstance(),90);
+		ThreadManager::startThread(CalibrateCalculate::getInstance(),90);
+		*(CalibrateSample::getInstance()->getData()->drawChessboard())		= true;
 	}
 }
 
@@ -217,6 +235,7 @@ void CalibrateSample::stopCalibrateSample(GtkButton *button, gpointer   user_dat
 {
 	ThreadManager::endNowThread(getInstance());
 	ThreadManager::endNowThread(CalibrateCalculate::getInstance());
+	*(CalibrateSample::getInstance()->getData()->drawChessboard())		= false;
 }
 
 CalibrateCalculate::CalibrateCalculate()
@@ -238,14 +257,12 @@ CalibrateCalculate::~CalibrateCalculate()
 
 }
 
-void CalibrateCalculate::initialize(GtkSpinButton* fpsCamera, DataContainer* data)
+void CalibrateCalculate::initialize(GtkSpinButton* fpsCalibration, GtkSpinButton* calibrationAmount, DataContainer* data)
 {
-	if(fpsCamera!=NULL)
-	{
-		mFPS		= 1000/gtk_spin_button_get_value_as_int(fpsCamera);
-	}
-	mData		= data;
-	mRun		= true;
+	mFpsCalibration			= fpsCalibration;
+	mCalibrationAmount		= calibrationAmount;
+	mData					= data;
+	mRun					= true;
 }
 
 void CalibrateCalculate::run()
@@ -254,6 +271,16 @@ void CalibrateCalculate::run()
 	clock_t currentTime;
 
 	mRun		= true;
+
+	if(mFpsCalibration!=NULL)
+	{
+		mFPS				= 1000/gtk_spin_button_get_value_as_int(mFpsCalibration);
+	}
+
+	if(mCalibrationAmount!=NULL)
+	{
+		mSampleAmount		= gtk_spin_button_get_value_as_int(mCalibrationAmount);
+	}
 
 	while (mRun)
 	{
@@ -277,6 +304,97 @@ void CalibrateCalculate::end()
 
 void CalibrateCalculate::calculate()
 {
+	int i, tempCalibrateChessboardW,tempCalibrateChessboardH,tempCalibrateChessboard;
+
+	IplImage *tempGrayLeft		= NULL;
+	IplImage *tempGrayRight		= NULL;
+
+	if(mData->getImageLeftGrayRef().tryLockData())
+	{
+		tempGrayLeft		= cvCreateImage(cvSize(mData->getImageLeftGrayRef()->width,mData->getImageLeftGrayRef()->height),mData->getImageLeftGrayRef()->depth,mData->getImageLeftGrayRef()->nChannels);
+		cvCopy(mData->getImageLeftGrayRef().getPtr(),tempGrayLeft);
+		mData->getImageLeftGrayRef().unlockData();
+	}
+
+	if(mData->getImageRightGrayRef().tryLockData())
+	{
+		tempGrayRight		= cvCreateImage(cvSize(mData->getImageRightGrayRef()->width,mData->getImageRightGrayRef()->height),mData->getImageRightGrayRef()->depth,mData->getImageRightGrayRef()->nChannels);
+		cvCopy(mData->getImageRightGrayRef().getPtr(),tempGrayRight);
+		mData->getImageRightGrayRef().unlockData();
+	}
+
+	tempCalibrateChessboardW		= *mData->getCalibrateChessboardW().getPtr();
+	tempCalibrateChessboardH		= *mData->getCalibrateChessboardH().getPtr();
+
+	tempCalibrateChessboard			= tempCalibrateChessboardW*tempCalibrateChessboardH;
+
+	/** Start calibrate. */
+
+	if(tempGrayLeft&&tempGrayRight)
+	{
+		CvPoint2D32f tempLeft[tempCalibrateChessboard];
+		CvPoint2D32f tempRight[tempCalibrateChessboard];
+
+		int resultLeft	= 0, countLeft = 0, resultRight = 0, countRight = 0;
+
+		resultLeft 		= cvFindChessboardCorners( tempGrayLeft, cvSize(tempCalibrateChessboardW, tempCalibrateChessboardH), &tempLeft[0], &countLeft, CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_NORMALIZE_IMAGE);
+		resultRight 	= cvFindChessboardCorners( tempGrayRight, cvSize(tempCalibrateChessboardW, tempCalibrateChessboardH), &tempRight[0], &countRight, CV_CALIB_CB_ADAPTIVE_THRESH |	CV_CALIB_CB_NORMALIZE_IMAGE);
+
+		{
+			// Copy current corners table to global table.
+
+			if(mData->getCalibrateDataAccess().tryLockData()) {
+
+				if(mData->getCalibrateCurrentPointsLeft().getPtr()!=NULL) {
+					delete [] mData->getCalibrateCurrentPointsLeft().getPtr();
+				}
+				mData->getCalibrateCurrentPointsLeft().setPtr(new CvPoint2D32f[tempCalibrateChessboard]);
+
+				if(mData->getCalibrateCurrentPointsRight().getPtr()!=NULL) {
+					delete [] mData->getCalibrateCurrentPointsRight().getPtr();
+				}
+				mData->getCalibrateCurrentPointsRight().setPtr(new CvPoint2D32f[tempCalibrateChessboard]);
+
+				CvPoint2D32f *tempSrcLeft,*tempSrcRight,*tempOutLeft,*tempOutRight;
+
+				tempSrcLeft		= tempLeft;
+				tempSrcRight	= tempRight;
+				tempOutLeft		= mData->getCalibrateCurrentPointsLeft().getPtr();
+				tempOutRight	= mData->getCalibrateCurrentPointsRight().getPtr();
+
+				for(i = 0 ; i < tempCalibrateChessboard ; ++i) {
+					*tempOutLeft		= *tempSrcLeft;
+					*tempOutRight		= *tempSrcRight;
+					++tempSrcLeft;
+					++tempSrcRight;
+					++tempOutLeft;
+					++tempOutRight;
+				}
+
+				*mData->getCalibrateCurrentCornersLeft().getPtr()		= countLeft;
+				*mData->getCalibrateCurrentCornersRight().getPtr()		= countRight;
+				*mData->getCalibrateResultLeft().getPtr()				= resultLeft;
+				*mData->getCalibrateResultRight().getPtr()				= resultRight;
+
+				mData->getCalibrateDataAccess().unlockData();
+			}
+
+		}
+
+	}
+
+	if(tempGrayLeft)
+	{
+		cvReleaseData(tempGrayLeft);
+		cvReleaseImage(&tempGrayLeft);
+	}
+
+	if(tempGrayRight)
+	{
+		cvReleaseData(tempGrayRight);
+		cvReleaseImage(&tempGrayRight);
+	}
+
 	printf("CalibrateCalculate ---------------- calculate \n");
 }
 
@@ -291,10 +409,10 @@ CalibrateCalculate* CalibrateCalculate::getInstance()
 	return mInstance.get();
 }
 
-void Calibration::initializeCalibrationModule(GtkSpinButton* cameraFPS ,GtkSpinButton* calibrationAmount, GtkSpinButton* calibrationDelay, GtkSpinButton* calibrationChessboardW, GtkSpinButton* calibrationChessboardH, GtkButton* startCalibration, GtkButton* stopCalibration, DataContainer* data)
+void Calibration::initializeCalibrationModule(GtkSpinButton* calibrationFPS ,GtkSpinButton* calibrationAmount, GtkSpinButton* calibrationDelay, GtkSpinButton* calibrationChessboardW, GtkSpinButton* calibrationChessboardH, GtkButton* startCalibration, GtkButton* stopCalibration, DataContainer* data)
 {
 	CalibrateSample::getInstance()->initialize(calibrationAmount, calibrationDelay, calibrationChessboardW, calibrationChessboardH, startCalibration, stopCalibration, data);
-	CalibrateCalculate::getInstance()->initialize(cameraFPS, data);
+	CalibrateCalculate::getInstance()->initialize(calibrationFPS, calibrationAmount, data);
 
 	if(startCalibration!=NULL)
 	{

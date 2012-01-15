@@ -8,6 +8,8 @@
 #include "ThreadManager.h"
 #include <stdlib.h>
 #include <boost/thread.hpp>
+#include <unistd.h>
+#include <sched.h>
 
 void ThreadRunnable::sleep(int delay)
 {
@@ -73,6 +75,33 @@ void ThreadManager::addThread(ThreadRunnable* objRun)
 
 }
 
+void ThreadManager::changePriority(boost::thread& thread, int priority)
+{
+	int retcode;
+	int policy;
+
+	pthread_t threadID = (pthread_t) thread.native_handle();
+
+	struct sched_param param;
+
+	if ((retcode = pthread_getschedparam(threadID, &policy, &param)) != 0)
+	{
+		//errno = retcode;
+		//perror("pthread_getschedparam");
+		//exit(EXIT_FAILURE);
+	}
+
+	policy = SCHED_FIFO;
+	param.sched_priority = priority;
+
+	if ((retcode = pthread_setschedparam(threadID, policy, &param)) != 0)
+	{
+		//errno = retcode;
+		//perror("pthread_setschedparam");
+		//exit(EXIT_FAILURE);
+	}
+}
+
 void ThreadManager::startThread(ThreadRunnable* objRun)
 {
 	for(ThreadList* i = ThreadManager::getInstance()->mThreadList; i != NULL ; i = i->mNext)
@@ -86,6 +115,22 @@ void ThreadManager::startThread(ThreadRunnable* objRun)
 		}
 	}
 }
+
+void ThreadManager::startThread(ThreadRunnable* objRun, int priority)
+{
+	for(ThreadList* i = ThreadManager::getInstance()->mThreadList; i != NULL ; i = i->mNext)
+	{
+		if(i->mObjRun==objRun) {
+			if(i->mThread==NULL) {
+				ThreadBoost threadBoost(i->mObjRun);
+				i->mThread		= new boost::thread(threadBoost);
+				changePriority(*i->mThread, priority);
+			}
+			break;
+		}
+	}
+}
+
 
 void ThreadManager::startAll()
 {

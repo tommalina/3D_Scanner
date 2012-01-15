@@ -14,7 +14,7 @@ CameraGdkDisplay::CameraGdkDisplay(unsigned int fps, DataContainer* data, GtkDra
 {
 	mInstance			= this;
 	mRun				= true;
-	mFPS				= fps;
+	mFPS				= 1000/fps;
 	mCamera1			= NULL;
 	mCamera2			= NULL;
 	mImage1				= NULL;
@@ -120,12 +120,61 @@ void CameraGdkDisplay::display()
 
 		cvCvtColor(mCamera1->getImage(), mImage1, CV_BGR2RGB);
 
-		if(!mPixbuf1)
+	}
+
+	if(mCamera2->getImage()&&mDrawingArea2)
+	{
+
+		if(!mImage2)
 		{
-			mPixbuf1 = gdk_pixbuf_new_from_data ((guchar*)mImage1->imageData, GDK_COLORSPACE_RGB, FALSE, mImage1->depth, mImage1->width, mImage1->height, mImage1->widthStep, NULL, NULL);
+			mImage2				= cvCreateImage( cvSize( mCamera2->getImage()->width, mCamera2->getImage()->height ), IPL_DEPTH_8U, 3 );
 		}
 
-		gtk_widget_queue_draw(GTK_WIDGET(mDrawingArea1));
+		cvCvtColor(mCamera2->getImage(), mImage2, CV_BGR2RGB);
+
+	}
+
+	if(mCamera1->getImage()&&mCamera2->getImage())
+	{
+		bool canDrawChessboard		= false;
+
+		mData->drawChessboard().lockData();
+		canDrawChessboard		= *mData->drawChessboard();
+		mData->drawChessboard().unlockData();
+
+		if(canDrawChessboard)
+		{
+			int tempCalibrateChessboardW;
+			int tempCalibrateChessboardH;
+			int tempCalibrateCurrentCornersLeft;
+			int tempCalibrateResultLeft;
+			int tempCalibrateCurrentCornersRight;
+			int tempCalibrateResultRight;
+
+			if(mData->getCalibrateDataAccess().tryLockData())
+			{
+				tempCalibrateChessboardW		= *(mData->getCalibrateChessboardW());
+				tempCalibrateChessboardH		= *(mData->getCalibrateChessboardH());
+				tempCalibrateCurrentCornersLeft		= *(mData->getCalibrateCurrentCornersLeft());
+				tempCalibrateResultLeft			= *(mData->getCalibrateResultLeft());
+				tempCalibrateCurrentCornersRight	= *(mData->getCalibrateCurrentCornersRight());
+				tempCalibrateResultRight		= *(mData->getCalibrateResultRight());
+
+				if(mData->getCalibrateCurrentPointsLeft().getPtr()!=NULL) {
+					cvDrawChessboardCorners(mImage1,cvSize(tempCalibrateChessboardW,tempCalibrateChessboardH),mData->getCalibrateCurrentPointsLeft().getPtr(),tempCalibrateCurrentCornersLeft,tempCalibrateResultLeft);
+				}
+				if(mData->getCalibrateCurrentPointsRight().getPtr()!=NULL) {
+					cvDrawChessboardCorners(mImage2,cvSize(tempCalibrateChessboardW,tempCalibrateChessboardH),mData->getCalibrateCurrentPointsRight().getPtr(),tempCalibrateCurrentCornersRight,tempCalibrateResultRight);
+				}
+
+				mData->getCalibrateDataAccess().unlockData();
+			}
+		}
+
+	}
+
+	if(mCamera1->getImage()&&mDrawingArea1)
+	{
 
 		if(mData->getImageLeftRef().tryLockData())
 		{
@@ -147,32 +196,25 @@ void CameraGdkDisplay::display()
 			mData->getImageLeftGrayRef().unlockData();
 		}
 
+		if(!mPixbuf1)
+		{
+			mPixbuf1 = gdk_pixbuf_new_from_data ((guchar*)mImage1->imageData, GDK_COLORSPACE_RGB, FALSE, mImage1->depth, mImage1->width, mImage1->height, mImage1->widthStep, NULL, NULL);
+		}
+
+		gtk_widget_queue_draw(GTK_WIDGET(mDrawingArea1));
+
 	}
 
 	if(mCamera2->getImage()&&mDrawingArea2)
 	{
 
-		if(!mImage2)
-		{
-			mImage2				= cvCreateImage( cvSize( mCamera2->getImage()->width, mCamera2->getImage()->height ), IPL_DEPTH_8U, 3 );
-		}
-
-		cvCvtColor(mCamera2->getImage(), mImage2, CV_BGR2RGB);
-
-		if(!mPixbuf2)
-		{
-			mPixbuf2 = gdk_pixbuf_new_from_data ((guchar*)mImage2->imageData, GDK_COLORSPACE_RGB, FALSE, mImage2->depth, mImage2->width, mImage2->height, mImage2->widthStep, NULL, NULL);
-		}
-
-		gtk_widget_queue_draw(GTK_WIDGET(mDrawingArea2));
-
 		if(mData->getImageRightRef().tryLockData())
 		{
 			if(!mData->getImageRightRef().getPtr())
 			{
-				mData->getImageRightRef().setPtr(cvCreateImage( cvSize( mCamera1->getImage()->width, mCamera1->getImage()->height ), mCamera1->getImage()->depth, mCamera1->getImage()->nChannels ));
+				mData->getImageRightRef().setPtr(cvCreateImage( cvSize( mCamera2->getImage()->width, mCamera2->getImage()->height ), mCamera2->getImage()->depth, mCamera2->getImage()->nChannels ));
 			}
-			cvCopy(mCamera1->getImage(), mData->getImageLeftRef().getPtr());
+			cvCopy(mCamera2->getImage(), mData->getImageRightRef().getPtr());
 			mData->getImageRightRef().unlockData();
 		}
 
@@ -180,11 +222,18 @@ void CameraGdkDisplay::display()
 		{
 			if(!mData->getImageRightGrayRef().getPtr())
 			{
-				mData->getImageRightGrayRef().setPtr(cvCreateImage( cvSize( mCamera1->getImageGray()->width, mCamera1->getImageGray()->height ), mCamera1->getImageGray()->depth, mCamera1->getImageGray()->nChannels ));
+				mData->getImageRightGrayRef().setPtr(cvCreateImage( cvSize( mCamera2->getImageGray()->width, mCamera2->getImageGray()->height ), mCamera2->getImageGray()->depth, mCamera2->getImageGray()->nChannels ));
 			}
-			cvCopy(mCamera1->getImageGray(), mData->getImageRightGrayRef().getPtr());
+			cvCopy(mCamera2->getImageGray(), mData->getImageRightGrayRef().getPtr());
 			mData->getImageRightGrayRef().unlockData();
 		}
+
+		if(!mPixbuf2)
+		{
+			mPixbuf2 = gdk_pixbuf_new_from_data ((guchar*)mImage2->imageData, GDK_COLORSPACE_RGB, FALSE, mImage2->depth, mImage2->width, mImage2->height, mImage2->widthStep, NULL, NULL);
+		}
+
+		gtk_widget_queue_draw(GTK_WIDGET(mDrawingArea2));
 
 	}
 

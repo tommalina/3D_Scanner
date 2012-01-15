@@ -129,6 +129,7 @@ private:
 
 	};
 
+
 	/**
 	 * Pointer to list with threads data and information.
 	 */
@@ -143,6 +144,16 @@ private:
 	 * Private constructor.
 	 */
 	ThreadManager(ThreadManager&) {};
+
+
+	/**
+	 * Method which change priority of thread.
+	 * @param thread - Boost thread.
+	 * @param priority - New piority of thread.
+	 */
+
+	static void changePriority(boost::thread& thread, int priority);
+
 
 public:
 
@@ -162,6 +173,13 @@ public:
 	 * @param objRun - Pointer to ThreadRunable object, used to recognize thread that we want to start.
 	 */
 	static void									startThread(ThreadRunnable* objRun);
+
+	/**
+	 * Method used to start specific thread.
+	 * @param objRun - Pointer to ThreadRunable object, used to recognize thread that we want to start.
+	 * @param priority - New priority of thread.
+	 */
+	static void									startThread(ThreadRunnable* objRun, int priority);
 
 	/**
 	 * Method used to end specific thread.

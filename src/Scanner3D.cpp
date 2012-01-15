@@ -62,6 +62,7 @@ int Scanner3D::Run(int argc, char** argv)
 	GtkSpinButton	*calibrationDelayButton;
 	GtkSpinButton	*calibrationAmountButton;
 	GtkSpinButton	*cameraFPS;
+	GtkSpinButton	*calibrationFPS;
 
 	GError			*error		= NULL;
 
@@ -104,6 +105,8 @@ int Scanner3D::Run(int argc, char** argv)
 
 	cameraFPS					= GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "cameraFPS"));
 
+	calibrationFPS				= GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "calibrationFPS"));
+
 	gtk_builder_connect_signals(builder, NULL);
 
 	g_object_unref(G_OBJECT(builder));
@@ -112,15 +115,15 @@ int Scanner3D::Run(int argc, char** argv)
 
 	//Initialize calibration module.
 
-	Calibration::initializeCalibrationModule(cameraFPS, calibrationAmountButton, calibrationDelayButton, spinButtonChessboardW, spinButtonChessboardH, calibrationStartButton, calibrationStopButton, mData);
+	Calibration::initializeCalibrationModule(calibrationFPS, calibrationAmountButton, calibrationDelayButton, spinButtonChessboardW, spinButtonChessboardH, calibrationStartButton, calibrationStopButton, mData);
 
 	// Start application threads that will support all 2D and 3D calculations.
 
-	CameraGdkDisplay cameraGdkDisplay(25, mData, camera1, camera2, spinButton1, spinButton2);
+	CameraGdkDisplay cameraGdkDisplay(30, mData, camera1, camera2, spinButton1, spinButton2);
 
 	ThreadManager::addThread(&cameraGdkDisplay);
 
-	ThreadManager::startAll();
+	ThreadManager::startThread(&cameraGdkDisplay, 0);
 
 	// Start UI main GTK thread.
 

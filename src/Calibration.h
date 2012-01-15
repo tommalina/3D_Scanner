@@ -18,7 +18,7 @@ class Calibration
 {
 public:
 
-	static void initializeCalibrationModule(GtkSpinButton* cameraFPS, GtkSpinButton* calibrationAmount, GtkSpinButton* calibrationDelay, GtkSpinButton* calibrationChessboardW, GtkSpinButton* calibrationChessboardH, GtkButton* startCalibration, GtkButton* stopCalibration, DataContainer* data);
+	static void initializeCalibrationModule(GtkSpinButton* calibrationFPS, GtkSpinButton* calibrationAmount, GtkSpinButton* calibrationDelay, GtkSpinButton* calibrationChessboardW, GtkSpinButton* calibrationChessboardH, GtkButton* startCalibration, GtkButton* stopCalibration, DataContainer* data);
 };
 
 #endif /* CALIBRATION_H_ */

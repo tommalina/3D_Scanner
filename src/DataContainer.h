@@ -16,10 +16,20 @@ class DataContainer
 
 public:
 
-	virtual ThreadDataUnit<IplImage>& getImageLeftRef() = 0;
-	virtual ThreadDataUnit<IplImage>& getImageRightRef() = 0;
-	virtual ThreadDataUnit<IplImage>& getImageLeftGrayRef() = 0;
-	virtual ThreadDataUnit<IplImage>& getImageRightGrayRef() = 0;
+	virtual ThreadDataUnit<IplImage>&	getImageLeftRef() = 0;
+	virtual ThreadDataUnit<IplImage>&	getImageRightRef() = 0;
+	virtual ThreadDataUnit<IplImage>&	getImageLeftGrayRef() = 0;
+	virtual ThreadDataUnit<IplImage>&	getImageRightGrayRef() = 0;
+	virtual ThreadDataUnit<bool>&		drawChessboard() = 0;
+	virtual	ThreadDataUnit<short>&		getCalibrateDataAccess() = 0;
+	virtual ThreadDataUnit<CvPoint2D32f>&		getCalibrateCurrentPointsLeft() = 0;
+	virtual ThreadDataUnit<CvPoint2D32f>&		getCalibrateCurrentPointsRight() = 0;
+	virtual ThreadDataUnit<int>&		getCalibrateChessboardW() = 0;
+	virtual ThreadDataUnit<int>&		getCalibrateChessboardH() = 0;
+	virtual ThreadDataUnit<int>&		getCalibrateCurrentCornersLeft() = 0;
+	virtual ThreadDataUnit<int>&		getCalibrateCurrentCornersRight() = 0;
+	virtual ThreadDataUnit<int>&		getCalibrateResultLeft() = 0;
+	virtual ThreadDataUnit<int>&		getCalibrateResultRight() = 0;
 
 	virtual ~DataContainer(){};
 
