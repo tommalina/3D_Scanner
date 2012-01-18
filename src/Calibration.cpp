@@ -165,19 +165,255 @@ void CalibrateSample::run()
 	*(mData->getCalibrateChessboardH())		= mChessboardH;
 	mData->getCalibrateChessboardH().unlockData();
 
-	mRun				= true;
+	mRun							= true;
 
-	int countAmount		= 0;
+	int countAmount					= 0;
+	int tempCalibrateChessboard		= mChessboardW*mChessboardH;
+	int tempCalibrateChessboardW	= mChessboardW;
+	int tempCalibrateChessboardH	= mChessboardH;
+
+	CvPoint2D32f calibratePointsLeft[tempCalibrateChessboard*mSampleAmount], calibratePointsRight[tempCalibrateChessboard*mSampleAmount];
 
 	while(mRun)
 	{
 
 		printf("CalibrateSample ---------------- Run ; countAmount = %d \n",countAmount);
 
-		if(++countAmount>=mSampleAmount)
+		if(countAmount>=mSampleAmount)
 		{
 			break;
 		}
+
+		IplImage *tempGrayLeft		= NULL;
+		IplImage *tempGrayRight		= NULL;
+
+		if(mData->getImageLeftGrayRef().tryLockData())
+		{
+			tempGrayLeft		= cvCreateImage(cvSize(mData->getImageLeftGrayRef()->width,mData->getImageLeftGrayRef()->height),mData->getImageLeftGrayRef()->depth,mData->getImageLeftGrayRef()->nChannels);
+			cvCopy(mData->getImageLeftGrayRef().getPtr(),tempGrayLeft);
+			mData->getImageLeftGrayRef().unlockData();
+		}
+
+		if(mData->getImageRightGrayRef().tryLockData())
+		{
+			tempGrayRight		= cvCreateImage(cvSize(mData->getImageRightGrayRef()->width,mData->getImageRightGrayRef()->height),mData->getImageRightGrayRef()->depth,mData->getImageRightGrayRef()->nChannels);
+			cvCopy(mData->getImageRightGrayRef().getPtr(),tempGrayRight);
+			mData->getImageRightGrayRef().unlockData();
+		}
+
+		if(tempGrayRight&&tempGrayLeft)
+		{
+
+			int i, countLeft, countRight , resultLeft, resultRight;
+			CvPoint2D32f tempLeft[tempCalibrateChessboard], tempRight[tempCalibrateChessboard];
+			bool gotData		=  false;
+
+			if(mData->getCalibrateDataAccess().tryLockData())
+			{
+				countLeft						= *mData->getCalibrateCurrentCornersLeft();
+				countRight						= *mData->getCalibrateCurrentCornersRight();
+				resultLeft						= *mData->getCalibrateResultLeft();
+				resultRight						= *mData->getCalibrateResultRight();
+
+				CvPoint2D32f *srcPtrLeft = mData->getCalibrateCurrentPointsLeft().getPtr(), *srcPtrRight = mData->getCalibrateCurrentPointsRight().getPtr();
+
+				if(srcPtrLeft!=NULL&&srcPtrRight!=NULL)
+				{
+					/*
+					CvPoint2D32f* endIter			= tempLeft+tempCalibrateChessboard*sizeof(CvPoint2D32f);
+					for(CvPoint2D32f *ptrLeft = &tempLeft[0],*ptrRight = &tempRight[0]; ptrLeft<endIter; ++ptrLeft, ++ptrRight, ++srcPtrLeft, ++srcPtrRight)
+					{
+						*ptrLeft		= *srcPtrLeft;
+						*ptrRight		= *srcPtrRight;
+					}
+					*/
+
+					for(i = 0 ; i < tempCalibrateChessboard; ++i)
+					{
+						tempLeft[i]			= *(++srcPtrLeft);
+						tempRight[i]		= *(++srcPtrRight);
+					}
+
+					gotData							= true;
+				}
+
+				mData->getCalibrateDataAccess().unlockData();
+			}
+
+
+			if(gotData&&resultLeft&&countLeft==tempCalibrateChessboard&&resultRight&&countRight==tempCalibrateChessboard)
+			{
+				bool calibrateCalculate		= false;
+
+				cvFindCornerSubPix( tempGrayLeft, &tempLeft[0], countLeft, cvSize(11, 11), cvSize(-1,-1), cvTermCriteria(CV_TERMCRIT_ITER+CV_TERMCRIT_EPS, 30, 0.01) );
+				cvFindCornerSubPix( tempGrayRight, &tempRight[0], countRight, cvSize(11, 11), cvSize(-1,-1), cvTermCriteria(CV_TERMCRIT_ITER+CV_TERMCRIT_EPS, 30, 0.01) );
+
+				for(i = 0 ; i < tempCalibrateChessboard ; ++i) {
+					calibratePointsLeft[countAmount*tempCalibrateChessboard+i]				= tempLeft[i];
+					calibratePointsRight[countAmount*tempCalibrateChessboard+i]				= tempRight[i];
+				}
+				++countAmount;
+			}
+
+		}
+
+		if(tempGrayLeft)
+		{
+			cvReleaseData(tempGrayLeft);
+			cvReleaseImage(&tempGrayLeft);
+		}
+
+		if(tempGrayRight)
+		{
+			cvReleaseData(tempGrayRight);
+			cvReleaseImage(&tempGrayRight);
+		}
+
+		/*
+
+					++svTemp->calibrateSamplesCount;
+					printf("-------------------- Sample : %d\n",svTemp->calibrateSamplesCount);
+
+					if(svTemp->calibrateSamplesCount>=svTemp->calibrateSamples) {
+						calibrateCalculate		= true;
+					} else {
+						svTemp->state			= svStateCalibrate;
+					}
+
+					pthread_mutex_unlock(svTemp->mainMutex);
+
+					if(calibrateCalculate) {
+
+						double M1[3][3], M2[3][3], D1[5], D2[5];
+						double R[3][3], T[3], E[3][3], F[3][3];
+						CvMat _M1 	= cvMat(3, 3, CV_64F, M1 );
+						CvMat _M2 	= cvMat(3, 3, CV_64F, M2 );
+						CvMat _D1 	= cvMat(1, 5, CV_64F, D1 );
+						CvMat _D2 	= cvMat(1, 5, CV_64F, D2 );
+						CvMat _R 	= cvMat(3, 3, CV_64F, R );
+						CvMat _T 	= cvMat(3, 1, CV_64F, T );
+						CvMat _E 	= cvMat(3, 3, CV_64F, E );
+						CvMat _F 	= cvMat(3, 3, CV_64F, F );
+
+						CvPoint3D32f	objectPoints[tempCalibrateChessboard*tempCalibrateSamples];
+						int				npoints[tempCalibrateSamples];
+
+						for( i = 0; i < tempCalibrateChessboardH; ++i )
+							for( j = 0; j < tempCalibrateChessboardW; ++j )
+								objectPoints[i*tempCalibrateChessboardW + j] =		cvPoint3D32f(i, j, 0);
+
+						for( i = 1; i < tempCalibrateSamples; ++i )
+							for(j = 0 ; j < tempCalibrateChessboard ; ++j)
+								objectPoints[i*tempCalibrateChessboard+j]		= objectPoints[j];
+
+						for(i = 0 ; i < tempCalibrateSamples ; ++i)
+							npoints[i]		= tempCalibrateChessboard;
+
+
+						pthread_mutex_lock(svTemp->mainMutex);
+						CvMat _objectPoints 	= cvMat(1, tempCalibrateChessboard*tempCalibrateSamples, CV_32FC3, &objectPoints[0] );
+						CvMat _imagePoints1 	= cvMat(1, tempCalibrateChessboard*tempCalibrateSamples, CV_32FC2, &svTemp->calibratePointsLeft[0] );
+						CvMat _imagePoints2 	= cvMat(1, tempCalibrateChessboard*tempCalibrateSamples, CV_32FC2, &svTemp->calibratePointsRight[0] );
+						CvMat _npoints 			= cvMat(1, tempCalibrateSamples, CV_32S, &npoints[0] );
+						pthread_mutex_unlock(svTemp->mainMutex);
+
+						cvSetIdentity(&_M1);
+						cvSetIdentity(&_M2);
+						cvZero(&_D1);
+						cvZero(&_D2);
+
+						// Calibrate.
+						cvStereoCalibrate( &_objectPoints, &_imagePoints1, &_imagePoints2, &_npoints, &_M1, &_D1, &_M2, &_D2, cvSize(IMAGE_WIDTH,IMAGE_HEIGHT), &_R, &_T, &_E, &_F, cvTermCriteria(CV_TERMCRIT_ITER+CV_TERMCRIT_EPS, 100, 1e-5), CV_CALIB_FIX_ASPECT_RATIO + CV_CALIB_ZERO_TANGENT_DIST + CV_CALIB_SAME_FOCAL_LENGTH );
+
+						pthread_mutex_lock(svTemp->mainMutex);
+						_imagePoints1 		= cvMat(1, tempCalibrateChessboard*tempCalibrateSamples, CV_32FC2, &svTemp->calibratePointsLeft[0] );
+						_imagePoints2 		= cvMat(1, tempCalibrateChessboard*tempCalibrateSamples, CV_32FC2, &svTemp->calibratePointsRight[0] );
+						pthread_mutex_unlock(svTemp->mainMutex);
+
+						CvMat _L1 			= cvMat(1, tempCalibrateChessboard*tempCalibrateSamples, CV_32FC3, &linesLeft[0]);
+						CvMat _L2 			= cvMat(1, tempCalibrateChessboard*tempCalibrateSamples, CV_32FC3, &linesRight[0]);
+						cvUndistortPoints( &_imagePoints1, &_imagePoints1, &_M1, &_D1, 0, &_M1 );
+						cvUndistortPoints( &_imagePoints2, &_imagePoints2, &_M2, &_D2, 0, &_M2 );
+						cvComputeCorrespondEpilines( &_imagePoints1, 1, &_F, &_L1 );
+						cvComputeCorrespondEpilines( &_imagePoints2, 2, &_F, &_L2 );
+
+						CvMat* mx1			= cvCreateMat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_32F);
+						CvMat* my1			= cvCreateMat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_32F);
+						CvMat* mx2			= cvCreateMat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_32F);
+						CvMat* my2			= cvCreateMat(IMAGE_HEIGHT, IMAGE_WIDTH, CV_32F);
+
+						double R1[3][3], R2[3][3], P1[3][4], P2[3][4];
+						CvMat _R1 			= cvMat(3, 3, CV_64F, R1);
+						CvMat _R2 			= cvMat(3, 3, CV_64F, R2);
+
+						if( useUncalibrated == 0 ) {
+							CvMat _P1 = cvMat(3, 4, CV_64F, P1);
+							CvMat _P2 = cvMat(3, 4, CV_64F, P2);
+							cvStereoRectify( &_M1, &_M2, &_D1, &_D2, cvSize(IMAGE_WIDTH,IMAGE_HEIGHT), &_R, &_T, &_R1, &_R2, &_P1, &_P2, 0, 0/*CV_CALIB_ZERO_DISPARITY*//* );
+							isVerticalStereo = fabs(P2[1][3]) > fabs(P2[0][3]);
+							//Precompute maps for cvRemap()
+							cvInitUndistortRectifyMap(&_M1,&_D1,&_R1,&_P1,mx1,my1);
+							cvInitUndistortRectifyMap(&_M2,&_D2,&_R2,&_P2,mx2,my2);
+						} else
+						if( useUncalibrated == 1 || useUncalibrated == 2 ) {
+
+							double H1[3][3], H2[3][3], iM[3][3];
+							CvMat _H1 = cvMat(3, 3, CV_64F, H1);
+							CvMat _H2 = cvMat(3, 3, CV_64F, H2);
+							CvMat _iM = cvMat(3, 3, CV_64F, iM);
+
+							if( useUncalibrated == 2 )
+								cvFindFundamentalMat( &_imagePoints1, &_imagePoints2, &_F);
+
+							cvStereoRectifyUncalibrated( &_imagePoints1, &_imagePoints2, &_F, cvSize(IMAGE_WIDTH,IMAGE_HEIGHT), &_H1, &_H2, 3);
+
+							cvInvert(&_M1, &_iM);
+							cvMatMul(&_H1, &_M1, &_R1);
+							cvMatMul(&_iM, &_R1, &_R1);
+							cvInvert(&_M2, &_iM);
+							cvMatMul(&_H2, &_M2, &_R2);
+							cvMatMul(&_iM, &_R2, &_R2);
+
+							cvInitUndistortRectifyMap(&_M1,&_D1,&_R1,&_M1,mx1,my1);
+							cvInitUndistortRectifyMap(&_M2,&_D1,&_R2,&_M2,mx2,my2);
+
+						}
+
+						pthread_mutex_lock(svTemp->mainMutex);
+
+						if(svTemp->x1!=NULL) {
+							cvReleaseMat(&svTemp->x1);
+							svTemp->x1		= NULL;
+						}
+						if(svTemp->y1!=NULL) {
+							cvReleaseMat(&svTemp->y1);
+							svTemp->y1		= NULL;
+						}
+						if(svTemp->x2!=NULL) {
+							cvReleaseMat(&svTemp->x2);
+							svTemp->x2		= NULL;
+						}
+						if(svTemp->y2!=NULL) {
+							cvReleaseMat(&svTemp->y2);
+							svTemp->y2		= NULL;
+						}
+
+						svTemp->x1			= mx1;
+						svTemp->x2			= mx2;
+						svTemp->y1			= my1;
+						svTemp->y2			= my2;
+
+						svTemp->state		= svStateOnly3DAvaiable;
+						pthread_mutex_unlock(svTemp->mainMutex);
+
+					}
+
+
+				}
+
+		 */
+
+
 		sleep(mDelay*1000);
 	}
 
@@ -304,7 +540,7 @@ void CalibrateCalculate::end()
 
 void CalibrateCalculate::calculate()
 {
-	int i, tempCalibrateChessboardW,tempCalibrateChessboardH,tempCalibrateChessboard;
+	int i,tempCalibrateChessboardW,tempCalibrateChessboardH,tempCalibrateChessboard;
 
 	IplImage *tempGrayLeft		= NULL;
 	IplImage *tempGrayRight		= NULL;
