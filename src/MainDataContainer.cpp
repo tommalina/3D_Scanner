@@ -10,6 +10,7 @@ MainDataContainer::MainDataContainer()
 	mCalibrateCurrentCornersRight.setPtr(new int(0));
 	mCalibrateResultLeft.setPtr(new int(0));
 	mCalibrateResultRight.setPtr(new int(0));
+	mStart3D.setPtr(new bool(false));
 }
 
 ThreadDataUnit<IplImage>& MainDataContainer::getImageLeftRef()
@@ -82,6 +83,30 @@ ThreadDataUnit<int>& MainDataContainer::getCalibrateResultRight()
 	return mCalibrateResultRight;
 }
 
+ThreadDataUnit<CvMat>& MainDataContainer::getCalibrateX1()
+{
+	return mCalibrateX1;
+}
+
+ThreadDataUnit<CvMat>& MainDataContainer::getCalibrateY1()
+{
+	return mCalibrateY1;
+}
+
+ThreadDataUnit<CvMat>& MainDataContainer::getCalibrateX2()
+{
+	return mCalibrateX2;
+}
+
+ThreadDataUnit<CvMat>& MainDataContainer::getCalibrateY2()
+{
+	return mCalibrateY2;
+}
+
+ThreadDataUnit<bool>& MainDataContainer::getStart3D()
+{
+	return mStart3D;
+}
 
 MainDataContainer::~MainDataContainer()
 {
@@ -121,6 +146,38 @@ MainDataContainer::~MainDataContainer()
 	}
 	getImageRightGrayRef().unlockData();
 
+	getCalibrateX1().lockData();
+	if(getCalibrateX1().getPtr()!=NULL)
+	{
+		CvMat* tempPtr		= getCalibrateX1().getPtr();
+		cvReleaseMat(&tempPtr);
+	}
+	getCalibrateX1().unlockData();
+
+	getCalibrateY1().lockData();
+	if(getCalibrateY1().getPtr()!=NULL)
+	{
+		CvMat* tempPtr		= getCalibrateY1().getPtr();
+		cvReleaseMat(&tempPtr);
+	}
+	getCalibrateY1().unlockData();
+
+	getCalibrateX2().lockData();
+	if(getCalibrateX2().getPtr()!=NULL)
+	{
+		CvMat* tempPtr		= getCalibrateX2().getPtr();
+		cvReleaseMat(&tempPtr);
+	}
+	getCalibrateX2().unlockData();
+
+	getCalibrateY2().lockData();
+	if(getCalibrateY2().getPtr()!=NULL)
+	{
+		CvMat* tempPtr		= getCalibrateY2().getPtr();
+		cvReleaseMat(&tempPtr);
+	}
+	getCalibrateY2().unlockData();
+
 	mCalibrateCurrentPointsLeft.removePtr();
 	mCalibrateCurrentPointsRight.removePtr();
 
@@ -134,5 +191,7 @@ MainDataContainer::~MainDataContainer()
 	mCalibrateResultRight.removePtr();
 
 	mDrawChessboard.removePtr();
+
+	mStart3D.removePtr();
 
 }

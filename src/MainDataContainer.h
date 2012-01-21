@@ -15,27 +15,34 @@ class MainDataContainer : public DataContainer {
 
 private:
 
-	ThreadDataUnit<IplImage>	mLeftImage;
-	ThreadDataUnit<IplImage>	mRightImage;
+	ThreadDataUnit<IplImage>				mLeftImage;
+	ThreadDataUnit<IplImage>				mRightImage;
 
-	ThreadDataUnit<IplImage>	mLeftImageGray;
-	ThreadDataUnit<IplImage>	mRightImageGray;
+	ThreadDataUnit<IplImage>				mLeftImageGray;
+	ThreadDataUnit<IplImage>				mRightImageGray;
 
 	ThreadDataUnit<CvPoint2D32f>			mCalibrateCurrentPointsLeft;
 	ThreadDataUnit<CvPoint2D32f>			mCalibrateCurrentPointsRight;
 
-	ThreadDataUnit<bool>		mDrawChessboard;
+	ThreadDataUnit<bool>					mDrawChessboard;
 
-	ThreadDataUnit<short>		mCalibrateDataAccess;
+	ThreadDataUnit<short>					mCalibrateDataAccess;
 
-	ThreadDataUnit<int>			mCalibrateChessboardW;
-	ThreadDataUnit<int>			mCalibrateChessboardH;
+	ThreadDataUnit<int>						mCalibrateChessboardW;
+	ThreadDataUnit<int>						mCalibrateChessboardH;
 
-	ThreadDataUnit<int>			mCalibrateCurrentCornersLeft;
-	ThreadDataUnit<int>			mCalibrateCurrentCornersRight;
+	ThreadDataUnit<int>						mCalibrateCurrentCornersLeft;
+	ThreadDataUnit<int>						mCalibrateCurrentCornersRight;
 
-	ThreadDataUnit<int>			mCalibrateResultLeft;
-	ThreadDataUnit<int>			mCalibrateResultRight;
+	ThreadDataUnit<int>						mCalibrateResultLeft;
+	ThreadDataUnit<int>						mCalibrateResultRight;
+
+	ThreadDataUnit<CvMat>					mCalibrateX1;
+	ThreadDataUnit<CvMat>					mCalibrateY1;
+	ThreadDataUnit<CvMat>					mCalibrateX2;
+	ThreadDataUnit<CvMat>					mCalibrateY2;
+
+	ThreadDataUnit<bool>					mStart3D;
 
 public:
 
@@ -62,6 +69,13 @@ public:
 
 	ThreadDataUnit<int>&		getCalibrateResultLeft();
 	ThreadDataUnit<int>&		getCalibrateResultRight();
+
+	ThreadDataUnit<CvMat>&		getCalibrateX1();
+	ThreadDataUnit<CvMat>&		getCalibrateY1();
+	ThreadDataUnit<CvMat>&		getCalibrateX2();
+	ThreadDataUnit<CvMat>&		getCalibrateY2();
+
+	ThreadDataUnit<bool>&		getStart3D();
 
 	virtual ~MainDataContainer();
 

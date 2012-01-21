@@ -30,6 +30,11 @@ public:
 	virtual ThreadDataUnit<int>&		getCalibrateCurrentCornersRight() = 0;
 	virtual ThreadDataUnit<int>&		getCalibrateResultLeft() = 0;
 	virtual ThreadDataUnit<int>&		getCalibrateResultRight() = 0;
+	virtual ThreadDataUnit<CvMat>&		getCalibrateX1() = 0;
+	virtual ThreadDataUnit<CvMat>&		getCalibrateY1() = 0;
+	virtual ThreadDataUnit<CvMat>&		getCalibrateX2() = 0;
+	virtual ThreadDataUnit<CvMat>&		getCalibrateY2() = 0;
+	virtual ThreadDataUnit<bool>&		getStart3D() = 0;
 
 	virtual ~DataContainer(){};
 
