@@ -108,6 +108,11 @@ ThreadDataUnit<bool>& MainDataContainer::getStart3D()
 	return mStart3D;
 }
 
+ThreadDataUnit<CvMat>& MainDataContainer::getDepthMap()
+{
+	return mDepthMap;
+}
+
 MainDataContainer::~MainDataContainer()
 {
 	getImageLeftRef().lockData();
@@ -177,6 +182,14 @@ MainDataContainer::~MainDataContainer()
 		cvReleaseMat(&tempPtr);
 	}
 	getCalibrateY2().unlockData();
+
+	getDepthMap().lockData();
+	if(getDepthMap().getPtr()!=NULL)
+	{
+		CvMat* tempPtr		= getDepthMap().getPtr();
+		cvReleaseMat(&tempPtr);
+	}
+	getDepthMap().unlockData();
 
 	mCalibrateCurrentPointsLeft.removePtr();
 	mCalibrateCurrentPointsRight.removePtr();

@@ -8,6 +8,13 @@
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
+  <object class="GtkAdjustment" id="calculate3DFPSSelect">
+    <property name="lower">1</property>
+    <property name="upper">100</property>
+    <property name="value">10</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
   <object class="GtkAdjustment" id="calibrationAmountSelect">
     <property name="lower">1</property>
     <property name="upper">100</property>
@@ -617,7 +624,7 @@
                                 <property name="secondary_icon_activatable">False</property>
                                 <property name="primary_icon_sensitive">True</property>
                                 <property name="secondary_icon_sensitive">True</property>
-                                <property name="adjustment">FPSSelect</property>
+                                <property name="adjustment">calculate3DFPSSelect</property>
                               </object>
                               <packing>
                                 <property name="expand">True</property>

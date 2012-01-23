@@ -43,6 +43,7 @@ private:
 	ThreadDataUnit<CvMat>					mCalibrateY2;
 
 	ThreadDataUnit<bool>					mStart3D;
+	ThreadDataUnit<CvMat>					mDepthMap;
 
 public:
 
@@ -76,6 +77,7 @@ public:
 	ThreadDataUnit<CvMat>&		getCalibrateY2();
 
 	ThreadDataUnit<bool>&		getStart3D();
+	ThreadDataUnit<CvMat>&		getDepthMap();
 
 	virtual ~MainDataContainer();
 

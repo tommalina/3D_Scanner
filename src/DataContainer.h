@@ -35,6 +35,7 @@ public:
 	virtual ThreadDataUnit<CvMat>&		getCalibrateX2() = 0;
 	virtual ThreadDataUnit<CvMat>&		getCalibrateY2() = 0;
 	virtual ThreadDataUnit<bool>&		getStart3D() = 0;
+	virtual ThreadDataUnit<CvMat>&		getDepthMap() = 0;
 
 	virtual ~DataContainer(){};
 
