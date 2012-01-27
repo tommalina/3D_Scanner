@@ -360,110 +360,110 @@ void CalculateDepthMap::calculateDepthMap() {
 	{
 
 		CvStereoBMState *BMState = cvCreateStereoBMState();
-		if(BMState==0) {
-			return;
+		if(BMState!=0) {
+
+			CvMat* imgLeft 		= cvCreateMat( IMAGE_HEIGHT, IMAGE_WIDTH, CV_8U );
+			CvMat* imgRight 	= cvCreateMat( IMAGE_HEIGHT, IMAGE_WIDTH, CV_8U );
+			CvMat* disp 		= cvCreateMat( IMAGE_HEIGHT, IMAGE_WIDTH, CV_16S );
+			//CvMat* vdisp 		= cvCreateMat( IMAGE_HEIGHT, IMAGE_WIDTH, CV_8U );
+
+			cvRemap( tempGrayLeft, imgLeft, x1, y1 );
+			cvRemap( tempGrayRight, imgRight, x2, y2 );
+
+
+			BMState->preFilterSize		= 41;
+			BMState->preFilterCap		= 31;
+			BMState->SADWindowSize		= 41;
+			BMState->minDisparity		= -64;
+			BMState->numberOfDisparities= 128;
+			BMState->textureThreshold	= 10;
+			BMState->uniquenessRatio	= 15;
+
+
+			// Orginal
+
+			/*
+			BMState->preFilterSize			= 31;
+			BMState->preFilterCap			= 31;
+			BMState->SADWindowSize			= 41;//255;
+			BMState->minDisparity			= -192;
+			BMState->numberOfDisparities	= 192;
+			BMState->textureThreshold		= 10;
+			BMState->uniquenessRatio		= 15;
+			*/
+
+			bool isVerticalStereo		= false;
+			int useUncalibrated			= 2;
+
+			if( !isVerticalStereo || useUncalibrated != 0 )
+			{
+				cvFindStereoCorrespondenceBM( imgLeft, imgRight, disp, BMState);
+
+				// hack to get rid of small-scale noise
+				cvErode(disp, disp, NULL, 2);
+				cvDilate(disp, disp, NULL, 2);
+
+				// show in 3D
+
+				//CvMat* xyz = cvCreateMat(disp->rows, disp->cols, CV_32FC3);
+				//CvMat* dispn = cvCreateMat( IMAGE_HEIGHT, IMAGE_WIDTH, CV_32F );
+
+				//CvMat Q;
+				//cvInitMatHeader(&Q,4,4,CV_32FC1,_Q);
+
+				//cvConvertScale(disp, dispn, 1.0/16);
+
+				//cvReprojectImageTo3D(dispn, xyz, &Q);
+
+				//cvShowImage(WINDOW_3D,xyz);
+
+				//cvReleaseMat(&xyz);
+				//cvReleaseMat(&dispn);
+
+			}
+
+			if(imgLeft!=NULL) {
+				cvReleaseMat(&imgLeft);
+			}
+
+			if(imgRight!=NULL) {
+				cvReleaseMat(&imgRight);
+			}
+
+			mData->getDepthMap().lockData();
+			CvMat* tempPtr		= mData->getDepthMap().getPtr();
+			if(tempPtr!=NULL)
+			{
+				cvReleaseMat(&tempPtr);
+			}
+			mData->getDepthMap().setPtr(disp);
+			mData->getDepthMap().unlockData();
+
+
+			/*
+			if(svTemp->imgLeft!=NULL) {
+				cvReleaseMat(&svTemp->imgLeft);
+				svTemp->imgLeft		= NULL;
+			}
+
+			if(svTemp->imgRight!=NULL) {
+				cvReleaseMat(&svTemp->imgRight);
+				svTemp->imgRight	= NULL;
+			}
+
+			if(svTemp->disp!=NULL) {
+				cvReleaseMat(&svTemp->disp);
+				svTemp->disp	= NULL;
+			}
+
+			svTemp->imgLeft		= imgLeft;
+			svTemp->imgRight	= imgRight;
+			svTemp->disp		= disp;
+			*/
+
+			cvReleaseStereoBMState(&BMState);
 		}
 
-		CvMat* imgLeft 		= cvCreateMat( IMAGE_HEIGHT, IMAGE_WIDTH, CV_8U );
-		CvMat* imgRight 	= cvCreateMat( IMAGE_HEIGHT, IMAGE_WIDTH, CV_8U );
-		CvMat* disp 		= cvCreateMat( IMAGE_HEIGHT, IMAGE_WIDTH, CV_16S );
-		//CvMat* vdisp 		= cvCreateMat( IMAGE_HEIGHT, IMAGE_WIDTH, CV_8U );
-
-
-		cvRemap( tempGrayLeft, imgLeft, x1, y1 );
-		cvRemap( tempGrayRight, imgRight, x2, y2 );
-
-
-		BMState->preFilterSize		= 41;
-		BMState->preFilterCap		= 31;
-		BMState->SADWindowSize		= 41;
-		BMState->minDisparity		= -64;
-		BMState->numberOfDisparities= 128;
-		BMState->textureThreshold	= 10;
-		BMState->uniquenessRatio	= 15;
-
-
-		// Orginal
-
-		/*
-		BMState->preFilterSize			= 31;
-		BMState->preFilterCap			= 31;
-		BMState->SADWindowSize			= 255;
-		BMState->minDisparity			= -192;
-		BMState->numberOfDisparities	= 192;
-		BMState->textureThreshold		= 10;
-		BMState->uniquenessRatio		= 15;
-		*/
-
-		bool isVerticalStereo		= false;
-		int useUncalibrated			= 2;
-
-		if( !isVerticalStereo || useUncalibrated != 0 )
-		{
-			cvFindStereoCorrespondenceBM( imgLeft, imgRight, disp, BMState);
-
-			// hack to get rid of small-scale noise
-			cvErode(disp, disp, NULL, 2);
-			cvDilate(disp, disp, NULL, 2);
-
-			// show in 3D
-
-			//CvMat* xyz = cvCreateMat(disp->rows, disp->cols, CV_32FC3);
-			//CvMat* dispn = cvCreateMat( IMAGE_HEIGHT, IMAGE_WIDTH, CV_32F );
-
-			//CvMat Q;
-			//cvInitMatHeader(&Q,4,4,CV_32FC1,_Q);
-
-			//cvConvertScale(disp, dispn, 1.0/16);
-
-			//cvReprojectImageTo3D(dispn, xyz, &Q);
-
-			//cvShowImage(WINDOW_3D,xyz);
-
-			//cvReleaseMat(&xyz);
-			//cvReleaseMat(&dispn);
-
-		}
-
-		if(imgLeft!=NULL) {
-			cvReleaseMat(&imgLeft);
-		}
-
-		if(imgRight!=NULL) {
-			cvReleaseMat(&imgRight);
-		}
-
-		mData->getDepthMap().lockData();
-		CvMat* tempPtr		= mData->getDepthMap().getPtr();
-		if(tempPtr!=NULL)
-		{
-			cvReleaseMat(&tempPtr);
-		}
-		mData->getDepthMap().setPtr(disp);
-		mData->getDepthMap().unlockData();
-
-		/*
-		if(svTemp->imgLeft!=NULL) {
-			cvReleaseMat(&svTemp->imgLeft);
-			svTemp->imgLeft		= NULL;
-		}
-
-		if(svTemp->imgRight!=NULL) {
-			cvReleaseMat(&svTemp->imgRight);
-			svTemp->imgRight	= NULL;
-		}
-
-		if(svTemp->disp!=NULL) {
-			cvReleaseMat(&svTemp->disp);
-			svTemp->disp	= NULL;
-		}
-
-		svTemp->imgLeft		= imgLeft;
-		svTemp->imgRight	= imgRight;
-		svTemp->disp		= disp;
-		*/
-
-		cvReleaseStereoBMState(&BMState);
 
 	}
 

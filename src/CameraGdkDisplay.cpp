@@ -118,8 +118,21 @@ void CameraGdkDisplay::display()
 			mImage1				= cvCreateImage( cvSize( mCamera1->getImage()->width, mCamera1->getImage()->height ), IPL_DEPTH_8U, 3 );
 		}
 
-		cvCvtColor(mCamera1->getImage(), mImage1, CV_BGR2RGB);
+		//if(*mData->getStart3D().getPtr()==true)
+		//{
+		//	CvMat* tempImage 		= cvCreateMat( mCamera1->getImageGray()->height, mCamera1->getImageGray()->width, CV_8U );
+		//	CvMat* tempX			= mData->getCalibrateX1().getPtr();
+		//	CvMat* tempY			= mData->getCalibrateY1().getPtr();
+		//	IplImage* srcTempImage	= mCamera1->getImageGray();
 
+		//	cvRemap( srcTempImage, tempImage, tempX, tempY);
+		//	cvCvtColor(tempImage, mImage1, CV_GRAY2RGB);
+		//	cvReleaseMat(&tempImage);
+		//}
+		//else
+		//{
+			cvCvtColor(mCamera1->getImage(), mImage1, CV_BGR2RGB);
+		//}
 	}
 
 	if(mCamera2->getImage()&&mDrawingArea2)
@@ -130,7 +143,20 @@ void CameraGdkDisplay::display()
 			mImage2				= cvCreateImage( cvSize( mCamera2->getImage()->width, mCamera2->getImage()->height ), IPL_DEPTH_8U, 3 );
 		}
 
-		cvCvtColor(mCamera2->getImage(), mImage2, CV_BGR2RGB);
+		//if(*mData->getStart3D().getPtr()==true)
+		//{
+		//	CvMat* tempImage 		= cvCreateMat( mCamera2->getImageGray()->height, mCamera2->getImageGray()->width, CV_8U );
+		//	CvMat* tempX			= mData->getCalibrateX2().getPtr();
+		//	CvMat* tempY			= mData->getCalibrateY2().getPtr();
+		//	IplImage* srcTempImage	= mCamera2->getImageGray();
+		//	cvRemap( srcTempImage, tempImage, tempX, tempY);
+		//	cvCvtColor(tempImage, mImage2, CV_GRAY2RGB);
+		//	cvReleaseMat(&tempImage);
+		//}
+		//else
+		//{
+			cvCvtColor(mCamera2->getImage(), mImage2, CV_BGR2RGB);
+		//}
 
 	}
 
@@ -186,16 +212,6 @@ void CameraGdkDisplay::display()
 			mData->getImageLeftRef().unlockData();
 		}
 
-		if(mData->getImageLeftGrayRef().tryLockData())
-		{
-			if(!mData->getImageLeftGrayRef().getPtr())
-			{
-				mData->getImageLeftGrayRef().setPtr(cvCreateImage( cvSize( mCamera1->getImageGray()->width, mCamera1->getImageGray()->height ), mCamera1->getImageGray()->depth, mCamera1->getImageGray()->nChannels ));
-			}
-			cvCopy(mCamera1->getImageGray(), mData->getImageLeftGrayRef().getPtr());
-			mData->getImageLeftGrayRef().unlockData();
-		}
-
 		if(!mPixbuf1)
 		{
 			mPixbuf1 = gdk_pixbuf_new_from_data ((guchar*)mImage1->imageData, GDK_COLORSPACE_RGB, FALSE, mImage1->depth, mImage1->width, mImage1->height, mImage1->widthStep, NULL, NULL);
@@ -218,16 +234,6 @@ void CameraGdkDisplay::display()
 			mData->getImageRightRef().unlockData();
 		}
 
-		if(mData->getImageRightGrayRef().tryLockData())
-		{
-			if(!mData->getImageRightGrayRef().getPtr())
-			{
-				mData->getImageRightGrayRef().setPtr(cvCreateImage( cvSize( mCamera2->getImageGray()->width, mCamera2->getImageGray()->height ), mCamera2->getImageGray()->depth, mCamera2->getImageGray()->nChannels ));
-			}
-			cvCopy(mCamera2->getImageGray(), mData->getImageRightGrayRef().getPtr());
-			mData->getImageRightGrayRef().unlockData();
-		}
-
 		if(!mPixbuf2)
 		{
 			mPixbuf2 = gdk_pixbuf_new_from_data ((guchar*)mImage2->imageData, GDK_COLORSPACE_RGB, FALSE, mImage2->depth, mImage2->width, mImage2->height, mImage2->widthStep, NULL, NULL);
@@ -237,7 +243,26 @@ void CameraGdkDisplay::display()
 
 	}
 
+	if(mCamera1->getImage()&&mCamera2->getImage())
+	{
+		mData->getImageLeftGrayRef().lockData();
+		mData->getImageRightGrayRef().lockData();
+		if(!mData->getImageLeftGrayRef().getPtr())
+		{
+			mData->getImageLeftGrayRef().setPtr(cvCreateImage( cvSize( mCamera1->getImageGray()->width, mCamera1->getImageGray()->height ), mCamera1->getImageGray()->depth, mCamera1->getImageGray()->nChannels ));
+		}
+		cvCopy(mCamera1->getImageGray(), mData->getImageLeftGrayRef().getPtr());
+		if(!mData->getImageRightGrayRef().getPtr())
+		{
+			mData->getImageRightGrayRef().setPtr(cvCreateImage( cvSize( mCamera2->getImageGray()->width, mCamera2->getImageGray()->height ), mCamera2->getImageGray()->depth, mCamera2->getImageGray()->nChannels ));
+		}
+		cvCopy(mCamera2->getImageGray(), mData->getImageRightGrayRef().getPtr());
+		mData->getImageRightGrayRef().unlockData();
+		mData->getImageLeftGrayRef().unlockData();
+	}
+
 	gdk_threads_leave();
+
 }
 
 CameraGdkDisplay* CameraGdkDisplay::mInstance		= NULL;

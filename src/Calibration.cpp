@@ -191,19 +191,18 @@ void CalibrateSample::run()
 		IplImage *tempGrayLeft		= NULL;
 		IplImage *tempGrayRight		= NULL;
 
-		if(mData->getImageLeftGrayRef().tryLockData())
-		{
-			tempGrayLeft		= cvCreateImage(cvSize(mData->getImageLeftGrayRef()->width,mData->getImageLeftGrayRef()->height),mData->getImageLeftGrayRef()->depth,mData->getImageLeftGrayRef()->nChannels);
-			cvCopy(mData->getImageLeftGrayRef().getPtr(),tempGrayLeft);
-			mData->getImageLeftGrayRef().unlockData();
-		}
+		mData->getImageLeftGrayRef().lockData();
+		mData->getImageRightGrayRef().lockData();
 
-		if(mData->getImageRightGrayRef().tryLockData())
-		{
-			tempGrayRight		= cvCreateImage(cvSize(mData->getImageRightGrayRef()->width,mData->getImageRightGrayRef()->height),mData->getImageRightGrayRef()->depth,mData->getImageRightGrayRef()->nChannels);
-			cvCopy(mData->getImageRightGrayRef().getPtr(),tempGrayRight);
-			mData->getImageRightGrayRef().unlockData();
-		}
+		tempGrayLeft		= cvCreateImage(cvSize(mData->getImageLeftGrayRef()->width,mData->getImageLeftGrayRef()->height),mData->getImageLeftGrayRef()->depth,mData->getImageLeftGrayRef()->nChannels);
+		cvCopy(mData->getImageLeftGrayRef().getPtr(),tempGrayLeft);
+
+
+		tempGrayRight		= cvCreateImage(cvSize(mData->getImageRightGrayRef()->width,mData->getImageRightGrayRef()->height),mData->getImageRightGrayRef()->depth,mData->getImageRightGrayRef()->nChannels);
+		cvCopy(mData->getImageRightGrayRef().getPtr(),tempGrayRight);
+
+		mData->getImageRightGrayRef().unlockData();
+		mData->getImageLeftGrayRef().unlockData();
 
 		if(tempGrayRight&&tempGrayLeft)
 		{
@@ -227,8 +226,8 @@ void CalibrateSample::run()
 					CvPoint2D32f *outPtrRight			= &tempRight[0];
 					for(i = 0 ; i < tempCalibrateChessboard; ++i)
 					{
-						*(++outPtrLeft)		= *(++srcPtrLeft);
-						*(++outPtrRight)	= *(++srcPtrRight);
+						*(outPtrLeft++)		= *(srcPtrLeft++);
+						*(outPtrRight++)	= *(srcPtrRight++);
 					}
 
 					gotData							= true;
