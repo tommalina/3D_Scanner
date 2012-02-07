@@ -16,6 +16,9 @@
 #include "MainDataContainer.h"
 #include "Calibration.h"
 
+#include <gtk/gtkgl.h>
+#include <GL/gl.h>
+
 std::auto_ptr<Scanner3D> Scanner3D::mInstance;
 
 Scanner3D* Scanner3D::getInstance()
@@ -78,6 +81,8 @@ int Scanner3D::Run(int argc, char** argv)
 	gdk_threads_init();
 
 	gtk_init(&argc, &argv);
+
+	gtk_gl_init(&argc, &argv);
 
 	builder			= gtk_builder_new();
 

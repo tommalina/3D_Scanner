@@ -9,6 +9,9 @@
 #include <stdio.h>
 #include <unistd.h>
 
+//#include <gtkglmm.h>
+#include <gdk/gdkgl.h>
+
 #include "Display3D.h"
 #include "ThreadManager.h"
 #include "Camera.h"
@@ -78,7 +81,7 @@ private:
 
 	CalculateDepthMap();
 
-	CalculateDepthMap(const DepthMap& obj);
+	CalculateDepthMap(const CalculateDepthMap& obj);
 
 public:
 
@@ -95,6 +98,37 @@ public:
 	DataContainer*								getData();
 
 	static CalculateDepthMap*					getInstance();
+
+};
+
+class Render3D : public ThreadRunnable
+{
+private:
+
+	static std::auto_ptr<Render3D>				mInstance;
+
+	bool										mRun;
+	int											mFPS;
+	DataContainer*								mData;
+	GtkSpinButton*								mSpinButtonFPS;
+
+	Render3D();
+
+	Render3D(const Render3D& obj);
+
+public:
+
+	virtual 									~Render3D();
+
+	void										run();
+
+	void										end();
+
+	void										initialize(GtkSpinButton* render3DFPS, DataContainer* data);
+
+	DataContainer*								getData();
+
+	static Render3D*							getInstance();
 
 };
 
@@ -270,7 +304,7 @@ CalculateDepthMap::CalculateDepthMap()
 	mSpinButtonFPS		= NULL;
 }
 
-CalculateDepthMap::CalculateDepthMap(const DepthMap& obj)
+CalculateDepthMap::CalculateDepthMap(const CalculateDepthMap& obj)
 {
 	mFPS				= 1000/30;
 	mSpinButtonFPS		= NULL;
@@ -499,6 +533,71 @@ void CalculateDepthMap::initialize(GtkSpinButton* depthMap3DFPS, DataContainer* 
 
 }
 
+Render3D::Render3D()
+{
+	mRun		= true;
+}
+
+Render3D::Render3D(const Render3D& obj)
+{
+	mRun		= true;
+}
+
+Render3D::~Render3D()
+{
+
+}
+
+void Render3D::run()
+{
+	mRun		= true;
+
+	if(mSpinButtonFPS!=NULL)
+	{
+		mFPS			= 1000/gtk_spin_button_get_value_as_int(mSpinButtonFPS);
+	}
+
+	clock_t lastTime			= clock() / (CLOCKS_PER_SEC / 1000);
+	clock_t currentTime;
+
+	while(mRun)
+	{
+
+		printf("---------------- Render 3D \n");
+
+		currentTime		= clock() / (CLOCKS_PER_SEC / 1000);
+		if(currentTime-lastTime<mFPS) {
+			sleep((mFPS-(currentTime-lastTime)));
+		}
+		lastTime		= clock() / (CLOCKS_PER_SEC / 1000);
+	}
+
+}
+
+void Render3D::end()
+{
+	mRun		= false;
+}
+
+std::auto_ptr<Render3D> Render3D::mInstance;
+
+Render3D* Render3D::getInstance()
+{
+	if(mInstance.get()==NULL)
+	{
+		mInstance.reset(new Render3D());
+	}
+	return mInstance.get();
+}
+
+void Render3D::initialize(GtkSpinButton* render3DFPS, DataContainer* data)
+{
+	mSpinButtonFPS		= render3DFPS;
+	mData				= data;
+
+}
+
+
 void Display3D::initializeDisplay3DModule(GtkButton* start3D, GtkButton* stop3D, GtkDrawingArea *depthMap, GtkDrawingArea *view3D, GtkSpinButton* calculate3DFPS, GtkSpinButton* view3DFPS, DataContainer* data)
 {
 	if(start3D!=NULL)
@@ -518,6 +617,7 @@ void Display3D::initializeDisplay3DModule(GtkButton* start3D, GtkButton* stop3D,
 
 	DepthMap::getInstance()->initialize(view3DFPS, depthMap, data);
 	CalculateDepthMap::getInstance()->initialize(calculate3DFPS, data);
+	Render3D::getInstance()->initialize(view3DFPS, data);
 
 }
 
