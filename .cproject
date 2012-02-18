@@ -80,6 +80,8 @@
 									<listOptionValue builtIn="false" value="opencv_highgui"/>
 									<listOptionValue builtIn="false" value="boost_thread"/>
 									<listOptionValue builtIn="false" value="gtkglextmm-x11-1.2"/>
+									<listOptionValue builtIn="false" value="gdkglextmm-x11-1.2"/>
+									<listOptionValue builtIn="false" value="gdkglext-x11-1.0"/>
 									<listOptionValue builtIn="false" value="gtkglext-x11-1.0"/>
 									<listOptionValue builtIn="false" value="gtk-x11-2.0"/>
 									<listOptionValue builtIn="false" value="gdk-x11-2.0"/>
@@ -201,6 +203,8 @@
 									<listOptionValue builtIn="false" value="opencv_highgui"/>
 									<listOptionValue builtIn="false" value="boost_thread"/>
 									<listOptionValue builtIn="false" value="gtkglextmm-x11-1.2"/>
+									<listOptionValue builtIn="false" value="gdkglextmm-x11-1.2"/>
+									<listOptionValue builtIn="false" value="gdkglext-x11-1.0"/>
 									<listOptionValue builtIn="false" value="gtkglext-x11-1.0"/>
 									<listOptionValue builtIn="false" value="gtk-x11-2.0"/>
 									<listOptionValue builtIn="false" value="gdk-x11-2.0"/>

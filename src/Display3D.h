@@ -21,7 +21,7 @@ class Display3D
 {
 public:
 
-	static void initializeDisplay3DModule(GtkButton* start3D, GtkButton* stop3D, GtkDrawingArea *depthMap, GtkDrawingArea *view3D, GtkSpinButton* calculate3DFPS, GtkSpinButton* view3DFPS, DataContainer* data);
+	static void initializeDisplay3DModule(GtkButton* start3D, GtkButton* stop3D, GtkDrawingArea *depthMap, GtkHBox *view3D, GtkSpinButton* calculate3DFPS, GtkSpinButton* view3DFPS, DataContainer* data);
 
 };
 

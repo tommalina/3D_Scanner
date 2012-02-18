@@ -58,7 +58,7 @@ int Scanner3D::Run(int argc, char** argv)
 	GtkDrawingArea	*camera1;
 	GtkDrawingArea	*camera2;
 	GtkDrawingArea	*depthMap;
-	GtkDrawingArea	*view3D;
+	GtkHBox			*view3D;
 	GtkSpinButton	*spinButton1;
 	GtkSpinButton	*spinButton2;
 	GtkSpinButton	*spinButtonChessboardW;
@@ -101,7 +101,7 @@ int Scanner3D::Run(int argc, char** argv)
 
 	depthMap					= GTK_DRAWING_AREA(gtk_builder_get_object(builder, "depthMap"));
 
-	view3D						= GTK_DRAWING_AREA(gtk_builder_get_object(builder, "3DScene"));
+	view3D						= GTK_HBOX(gtk_builder_get_object(builder, "scene3D"));
 
 	spinButton1					= GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "cameraId1"));
 
@@ -153,9 +153,13 @@ int Scanner3D::Run(int argc, char** argv)
 
 	ThreadManager::startThread(&cameraGdkDisplay, 0);
 
+	//gtk_container_set_reallocate_redraws(GTK_CONTAINER(window), TRUE);
+
 	// Start UI main GTK thread.
 
 	gdk_threads_enter();
+
+	gtk_widget_show_all(window);
 
 	gtk_main();
 

@@ -808,9 +808,12 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkDrawingArea" id="3DScene">
+                      <object class="GtkHBox" id="scene3D">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <child>
+                          <placeholder/>
+                        </child>
                       </object>
                       <packing>
                         <property name="expand">True</property>
